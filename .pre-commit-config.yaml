@@ -1,0 +1,24 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+- repo: local
+  hooks:
+    - id: frontend-lint
+      name: Frontend Linting
+      entry: npm run lint
+      language: system
+      pass_filenames: false
+    - id: frontend-typecheck
+      name: Frontend Type Checking
+      entry: npm run typecheck
+      language: system
+      pass_filenames: false
+    - id: frontend-test
+      name: Frontend Tests
+      entry: npm run test
+      language: system
+      pass_filenames: false
