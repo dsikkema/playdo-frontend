@@ -1,10 +1,12 @@
 # Playdo Frontend
 
 ## Directory
+
 Note: This app is under the `playdo-frontend/` directory of the playdo project, all commands must be run from this
 directory.
 
 ## Tech Stack
+
 Started from a template: https://github.com/joaopaulomoraes/reactjs-vite-tailwindcss-boilerplate
 
 Built with Vite, React 18, TypeScript, Vitest, Testing Library, TailwindCSS 3, Eslint and Prettier
@@ -27,6 +29,7 @@ The application follows a component-based architecture with clear separation of 
 - **Components**: Reusable UI components for rendering the application
 
 Key components:
+
 - `App`: Main application component, manages conversation selection state
 - `ConversationView`: Displays messages from the selected conversation
 - `Message`: Renders individual messages with appropriate styling
@@ -51,6 +54,7 @@ npm install
 ### Development
 
 Start the development server with hot reloading:
+
 ```bash
 npm run dev
 ```
@@ -60,11 +64,13 @@ The application will be available at http://localhost:5173.
 ### Testing
 
 Run all tests:
+
 ```bash
 npm run test
 ```
 
 View and interact with tests via UI:
+
 ```bash
 npm run test:ui
 ```
@@ -72,16 +78,19 @@ npm run test:ui
 ### Linting and Type Checking
 
 Check for linting issues:
+
 ```bash
 npm run lint
 ```
 
 Check for TypeScript errors:
+
 ```bash
 npm run typecheck
 ```
 
 Build the application:
+
 ```bash
 npm run build
 ```

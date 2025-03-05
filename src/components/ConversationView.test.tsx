@@ -126,7 +126,11 @@ describe('<ConversationView />', () => {
 
     // Assert
     await waitFor(() => {
-      expect(screen.getByText('No messages found.')).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          'No messages found. Start the conversation by sending a message below.'
+        )
+      ).toBeInTheDocument()
     })
     expect(mockFetchConversation).toHaveBeenCalledWith(conversationId)
   })

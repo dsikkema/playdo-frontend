@@ -13,6 +13,7 @@ Our approach stands apart from traditional programming education by focusing on 
 The UI is deliberately sleek and uncluttered, with three main components: a code editor on the left, a chat interface with the Playdo AI on the right, and a prominently displayed green run button. When code runs, the output appears in a fourth section beneath the code editor.
 
 This minimalist design serves multiple purposes:
+
 - Reduces cognitive load for beginners
 - Eliminates intimidating technical complexity
 - Keeps focus on the essential learning experience
@@ -29,6 +30,7 @@ The Playdo AI doesn't just tell students about programming concepts—it guides 
 We firmly believe in making coding accessible by removing unnecessary barriers while preserving the authentic learning experience. The Playdo AI provides clear, specific guidance when errors occur—explaining what went wrong and how to fix it without writing the exact solution code.
 
 This approach strikes a balance between:
+
 - Preventing the frustration that causes many beginners to abandon programming
 - Building the problem-solving skills necessary for independent coding
 
@@ -79,6 +81,7 @@ As one of our guiding principles states: "We're hippies, and we're going to make
 ## Technical Context Considerations
 
 The LLM's context window will include:
+
 - Current code in the editor
 - Recent output from code execution
 - Recent conversation history with the student
@@ -88,6 +91,7 @@ The LLM's context window will include:
 - Previous code examples relevant to current topic
 
 This context allows Playdo to:
+
 - Identify patterns in the student's coding style
 - Recognize errors in context
 - Adapt examples to match demonstrated interests
@@ -95,6 +99,7 @@ This context allows Playdo to:
 - Reference back to previous work when relevant
 
 Playdo will maintain and update:
+
 - A progress file tracking mastered topics in the DAG
 - A preferences file recording identified interests and learning patterns
 - A session history allowing review of past lessons and code
@@ -102,6 +107,7 @@ Playdo will maintain and update:
 ## Beyond the MVP
 
 While our initial focus is on a streamlined single-user experience, future enhancements may include:
+
 - Visual representation of progress through the curriculum DAG
 - Expanded visualization tools (turtle graphics, simple plotting)
 - More sophisticated project saving and organization

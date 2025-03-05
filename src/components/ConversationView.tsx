@@ -90,26 +90,26 @@ function ConversationView({ conversationId }: ConversationViewProps) {
     return <div className="py-8 text-red-500">{error}</div>
   }
 
-  // Show empty state
-  if (
-    !conversation ||
-    !conversation.messages ||
-    conversation.messages.length === 0
-  ) {
-    return <div className="py-8">No messages found.</div>
-  }
-
   return (
     <div className="mx-auto flex h-full max-w-2xl flex-col p-4">
       <h1 className="mb-6 text-2xl font-bold">
-        Conversation #{conversation.id}
+        Conversation #{conversation?.id || conversationId}
       </h1>
 
       {/* Message list with overflow scrolling */}
       <div className="mb-4 flex-1 space-y-4 overflow-y-auto">
-        {conversation.messages.map((message, index) => (
-          <Message key={index} message={message} />
-        ))}
+        {conversation &&
+        conversation.messages &&
+        conversation.messages.length > 0 ? (
+          conversation.messages.map((message, index) => (
+            <Message key={index} message={message} />
+          ))
+        ) : (
+          <div className="py-8">
+            No messages found. Start the conversation by sending a message
+            below.
+          </div>
+        )}
       </div>
 
       {/* Message input form: TOODO: wrap input, expand vertically down */}
