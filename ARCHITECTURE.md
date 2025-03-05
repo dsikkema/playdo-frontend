@@ -1,10 +1,10 @@
-# PlayDo Architecture
+# Playdo Architecture
 
-This document outlines the architecture for PlayDo, an integrated learning environment designed for high school students learning Python. The architecture described here aims to balance quick MVP development with sound architectural decisions that will allow for future expansion.
+This document outlines the architecture for Playdo, an integrated learning environment designed for high school students learning Python. The architecture described here aims to balance quick MVP development with sound architectural decisions that will allow for future expansion.
 
 ## System Overview
 
-PlayDo is a web application with a clear separation between frontend and backend components:
+Playdo is a web application with a clear separation between frontend and backend components:
 
 - **Frontend**: React/TypeScript application that provides the user interface, code editor, and handles Python code execution via Pyodide (WASM)
 - **Backend**: Flask/Python API that manages conversations with the Claude AI, stores conversation history, and tracks learning progress
@@ -228,7 +228,7 @@ class CodeSnippet(Base):
    ```
 
 ### Linting and Formatting
-Maintaining code quality and consistency is essential for collaborative development. PlayDo uses Ruff for Python linting and formatting:
+Maintaining code quality and consistency is essential for collaborative development. Playdo uses Ruff for Python linting and formatting:
 
 1. Run linting to check for code issues:
    ```
@@ -317,4 +317,4 @@ While not part of the MVP, future deployment should consider:
 
 This architecture provides a foundation for rapid MVP development while maintaining a clear path for future enhancements. The separation of frontend and backend concerns, along with the use of Pyodide for client-side Python execution, creates a responsive learning environment that can be deployed with minimal server resources.
 
-By leveraging modern web technologies and focusing on a clean, maintainable codebase, PlayDo can quickly provide value to students while establishing the technical foundation for future growth.
+By leveraging modern web technologies and focusing on a clean, maintainable codebase, Playdo can quickly provide value to students while establishing the technical foundation for future growth.

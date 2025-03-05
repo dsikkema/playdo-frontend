@@ -112,7 +112,7 @@ function ConversationView({ conversationId }: ConversationViewProps) {
         ))}
       </div>
 
-      {/* Message input form */}
+      {/* Message input form: TOODO: wrap input, expand vertically down */}
       <form onSubmit={handleSendMessage} className="mt-auto flex items-center">
         <input
           type="text"

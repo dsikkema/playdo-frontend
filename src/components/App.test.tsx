@@ -119,7 +119,7 @@ describe('<App />', () => {
     // Assert
     const textareaElement = screen.getByTestId('code-editor-textarea')
     expect(textareaElement).toHaveValue(
-      "# Write your Python code here\nprint('Hello, PlayDo!')"
+      "# Write your Python code here\nprint('Hello, Playdo!')"
     )
   })
 })

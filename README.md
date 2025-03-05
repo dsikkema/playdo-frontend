@@ -1,4 +1,4 @@
-# PlayDo Frontend
+# Playdo Frontend
 
 ## Directory
 Note: This app is under the `playdo-frontend/` directory of the playdo project, all commands must be run from this
