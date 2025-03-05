@@ -18,7 +18,7 @@ vi.mock('./ConversationSelector', () => ({
     onSelectConversation: (id: number | null) => void
     selectedConversationId: number | null
   }) => (
-    <div data-testid="conversation-selector">
+    <div data-testid="mock-conversation-selector">
       {/**
        * Note: replaces the html content implementation of the real ConversationSelector, because we don't need or care about those implementation
        * details. We only need something in the test component so that we can hook into it and cause the 'onSelectConversation' callback to be
@@ -47,7 +47,7 @@ vi.mock('./ConversationSelector', () => ({
 
 vi.mock('./ConversationView', () => ({
   default: ({ conversationId }: { conversationId: number | null }) => (
-    <div data-testid="conversation-view">
+    <div data-testid="mock-conversation-view">
       {conversationId
         ? `Viewing conversation ${conversationId}`
         : 'No conversation selected'}
@@ -63,9 +63,9 @@ vi.mock('./CodeEditor', () => ({
     initialCode: string
     onChange: (code: string) => void
   }) => (
-    <div data-testid="code-editor">
+    <div data-testid="mock-code-editor">
       <textarea
-        data-testid="code-editor-textarea"
+        data-testid="mock-code-input"
         value={initialCode}
         onChange={(e) => onChange && onChange(e.target.value)}
       />
@@ -96,28 +96,6 @@ vi.mock('../hooks/usePythonExecution', () => ({
     status: PyodideStatus.READY,
     error: null
   }))
-}))
-
-// Mock CodeEditor to avoid issues with CodeMirror in tests
-vi.mock('./CodeEditor', () => ({
-  default: vi.fn(({ initialCode, onChange }) => (
-    <div data-testid="mock-code-editor">
-      <textarea
-        data-testid="mock-code-input"
-        value={initialCode}
-        onChange={(e) => onChange && onChange(e.target.value)}
-      />
-    </div>
-  ))
-}))
-
-// Mock other components for simplicity
-vi.mock('./ConversationView', () => ({
-  default: vi.fn(() => <div data-testid="mock-conversation-view" />)
-}))
-
-vi.mock('./ConversationSelector', () => ({
-  default: vi.fn(() => <div data-testid="mock-conversation-selector" />)
 }))
 
 describe('<App />', () => {

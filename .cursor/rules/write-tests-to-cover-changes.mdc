@@ -21,6 +21,8 @@ A bug is NOT fixed until a test proves that it's fixed, that would have failed w
 - Hooks: Test custom hooks with `@testing-library/react-hooks`
 
 ## Test case design
+- DO NOT mock the same component multiple times. Check if there is already a mock of the component before adding a
+  new mock. Multiple mocks of the same component can cause tests to behave incorrectly and not spot bugs.
 - Tests should be COMPREHENSIVE and cover edge cases, not just the happy path.
 - When there are a variable number of inputs or outputs (such as a list that may contain multiple messages, multiple
   users, a map with many key/value pairs, or etcetera), ALWAYS test the cases of zero, one, and many items. Test

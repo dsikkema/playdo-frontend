@@ -73,6 +73,8 @@ View and interact with tests via UI:
 
 #### Pyodide Integration Tests
 
+Pyodide is a WASM-based Python interpreter that runs in the browser.
+
 Pyodide integration tests require a browser environment:
 
 ```bash
