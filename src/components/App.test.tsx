@@ -53,13 +53,32 @@ vi.mock('./ConversationView', () => ({
   )
 }))
 
+vi.mock('./CodeEditor', () => ({
+  default: ({
+    initialCode,
+    onChange
+  }: {
+    initialCode: string
+    onChange: (code: string) => void
+  }) => (
+    <div data-testid="code-editor">
+      <textarea
+        data-testid="code-editor-textarea"
+        value={initialCode}
+        onChange={(e) => onChange && onChange(e.target.value)}
+      />
+    </div>
+  )
+}))
+
 describe('<App />', () => {
-  it('renders the ConversationSelector and ConversationView components', () => {
+  it('renders the ConversationSelector, CodeEditor, and ConversationView components', () => {
     // Act
     render(<App />)
 
     // Assert
     expect(screen.getByTestId('conversation-selector')).toBeInTheDocument()
+    expect(screen.getByTestId('code-editor')).toBeInTheDocument()
     expect(screen.getByTestId('conversation-view')).toBeInTheDocument()
   })
 
@@ -82,5 +101,16 @@ describe('<App />', () => {
     // given the appropriate value and hence rendering the appropriate state.
     expect(screen.getByText('Viewing conversation 1')).toBeInTheDocument()
     expect(screen.getByTestId('selected-id').textContent).toBe('1')
+  })
+
+  it('initializes the CodeEditor with default code', () => {
+    // Act
+    render(<App />)
+
+    // Assert
+    const textareaElement = screen.getByTestId('code-editor-textarea')
+    expect(textareaElement).toHaveValue(
+      "# Write your Python code here\nprint('Hello, PlayDo!')"
+    )
   })
 })
