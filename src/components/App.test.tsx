@@ -73,6 +73,26 @@ vi.mock('./CodeEditor', () => ({
   )
 }))
 
+// Mock the OutputDisplay component
+vi.mock('./OutputDisplay', () => ({
+  default: ({
+    stdout,
+    stderr,
+    error
+  }: {
+    stdout: string
+    stderr: string
+    error: string | null
+    isLoading?: boolean
+  }) => (
+    <div data-testid="mock-output-display">
+      {stdout && <pre data-testid="mock-stdout">{stdout}</pre>}
+      {stderr && <pre data-testid="mock-stderr">{stderr}</pre>}
+      {error && <pre data-testid="mock-error">{error}</pre>}
+    </div>
+  )
+}))
+
 // Mock the usePythonExecution hook
 vi.mock('../hooks/usePythonExecution', () => ({
   default: vi.fn(() => ({
@@ -146,7 +166,7 @@ describe('<App />', () => {
     render(<App />)
 
     // Assert
-    expect(screen.getByTestId('output-display')).toBeInTheDocument()
+    expect(screen.getByTestId('mock-output-display')).toBeInTheDocument()
   })
 
   it('should execute code when the run button is clicked', async () => {
@@ -221,5 +241,40 @@ describe('<App />', () => {
 
     // Cleanup
     consoleErrorSpy.mockRestore()
+  })
+
+  it('should pass execution result to OutputDisplay after running code', async () => {
+    // Arrange
+    const user = userEvent.setup()
+    const executionResult = {
+      stdout: 'Test output',
+      stderr: 'Test error',
+      error: null,
+      result: 'Test result'
+    }
+
+    vi.mocked(usePythonExecution).mockReturnValue({
+      executeCode: mockExecuteCode,
+      initialize: vi.fn(),
+      result: executionResult,
+      isLoading: false,
+      status: PyodideStatus.READY,
+      error: null
+    })
+
+    // Act
+    render(<App />)
+    await user.click(screen.getByTestId('run-code-button'))
+
+    // Assert
+    expect(mockExecuteCode).toHaveBeenCalled()
+
+    // Check that the OutputDisplay component is rendered
+    const outputContainer = screen.getByTestId('mock-output-display')
+    expect(outputContainer).toBeInTheDocument()
+
+    // Check that it's displaying the expected output
+    expect(screen.getByTestId('mock-stdout')).toHaveTextContent('Test output')
+    expect(screen.getByTestId('mock-stderr')).toHaveTextContent('Test error')
   })
 })
