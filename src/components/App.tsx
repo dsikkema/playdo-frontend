@@ -14,6 +14,9 @@ function App() {
     "# Write your Python code here\nprint('Hello, Playdo!')"
   )
 
+  // below function does code execution and populates outputs into result. Happens
+  // on every component re-render. That way the OutputElement below can display
+  // it all.
   const { executeCode, initialize, result, isLoading } = usePythonExecution()
 
   // Initialize Pyodide on component mount

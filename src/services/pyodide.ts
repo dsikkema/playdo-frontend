@@ -65,12 +65,12 @@ class PyodideService {
     this.pyodidePromise = loadPyodide({
       indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
     })
-      .then((pyodide) => {
+      .then((pyodide: PyodideInterface) => {
         this.pyodide = pyodide
         this.status = PyodideStatus.READY
         return pyodide
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         this.status = PyodideStatus.ERROR
         console.error('Failed to load Pyodide:', error)
         throw error
@@ -107,11 +107,11 @@ class PyodideService {
 
     try {
       // Execute the code
-      const result = await this.pyodide.runPythonAsync(code)
+      const result: unknown = await this.pyodide.runPythonAsync(code)
 
       // Collect output
-      const stdout = this.stdoutBuffer.join('\n')
-      const stderr = this.stderrBuffer.join('\n')
+      const stdout: string = this.stdoutBuffer.join('\n')
+      const stderr: string = this.stderrBuffer.join('\n')
 
       return {
         stdout,
@@ -119,10 +119,10 @@ class PyodideService {
         error: null,
         result
       }
-    } catch (error) {
+    } catch (error: unknown) {
       // Collect output even in case of error
-      const stdout = this.stdoutBuffer.join('\n')
-      const stderr = this.stderrBuffer.join('\n')
+      const stdout: string = this.stdoutBuffer.join('\n')
+      const stderr: string = this.stderrBuffer.join('\n')
 
       return {
         stdout,
@@ -139,24 +139,24 @@ class PyodideService {
   /**
    * Redirect stdout and stderr to buffers
    */
-  private redirectOutput() {
+  private redirectOutput(): void {
     // Save original methods
-    const originalConsoleLog = console.log
-    const originalConsoleError = console.error
-    const stdoutBuffer = this.stdoutBuffer
-    const stderrBuffer = this.stderrBuffer
+    const originalConsoleLog: (...data: unknown[]) => void = console.log
+    const originalConsoleError: (...data: unknown[]) => void = console.error
+    const stdoutBuffer: string[] = this.stdoutBuffer
+    const stderrBuffer: string[] = this.stderrBuffer
 
     // Override console.log to capture stdout
-    console.log = function (...args) {
-      const output = args.map((arg) => String(arg)).join(' ')
+    console.log = function (...args: unknown[]): void {
+      const output: string = args.map((arg) => String(arg)).join(' ')
       stdoutBuffer.push(output)
       // Still call original for debugging
       originalConsoleLog.apply(console, args)
     }
 
     // Override console.error to capture stderr
-    console.error = function (...args) {
-      const output = args.map((arg) => String(arg)).join(' ')
+    console.error = function (...args: unknown[]): void {
+      const output: string = args.map((arg) => String(arg)).join(' ')
       stderrBuffer.push(output)
       // Still call original for debugging
       originalConsoleError.apply(console, args)
@@ -193,7 +193,7 @@ class PyodideService {
   /**
    * Restore original stdout and stderr
    */
-  private restoreOutput() {
+  private restoreOutput(): void {
     // Restore console methods
     console.log = this.originalConsoleLog
     console.error = this.originalConsoleError
@@ -206,7 +206,7 @@ class PyodideService {
           sys.stdout = sys.__stdout__
           sys.stderr = sys.__stderr__
         `)
-      } catch (e) {
+      } catch (e: unknown) {
         console.error('Error restoring Python stdout/stderr:', e)
       }
     }
