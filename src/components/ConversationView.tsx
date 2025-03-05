@@ -1,6 +1,6 @@
 // src/components/Conversation.tsx
 
-import { useEffect, useState, FormEvent } from 'react'
+import { useEffect, useState, FormEvent, ChangeEvent } from 'react'
 import { Conversation } from '../types'
 import { fetchConversation, sendMessage } from '../services/api'
 import Message from './Message'
@@ -72,6 +72,15 @@ function ConversationView({ conversationId }: ConversationViewProps) {
     }
   }
 
+  // Function to handle textarea input and auto-resize
+  const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setMessageInput(e.target.value)
+
+    // Auto-resize the textarea
+    e.target.style.height = 'auto'
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`
+  }
+
   if (conversationId == null) {
     return (
       <div className="py-8">Please select a conversation from the list.</div>
@@ -112,19 +121,28 @@ function ConversationView({ conversationId }: ConversationViewProps) {
         )}
       </div>
 
-      {/* Message input form: TOODO: wrap input, expand vertically down */}
-      <form onSubmit={handleSendMessage} className="mt-auto flex items-center">
-        <input
-          type="text"
+      {/* Message input form with auto-expanding textarea */}
+      <form onSubmit={handleSendMessage} className="mt-auto flex items-start">
+        <textarea
           value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
+          onChange={handleTextareaChange}
           placeholder="Type your message..."
-          className="flex-1 rounded-l-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 resize-none overflow-y-auto rounded-l-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={sending}
+          rows={1}
+          style={{ minHeight: '42px', maxHeight: '150px' }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              if (messageInput.trim()) {
+                handleSendMessage(e)
+              }
+            }
+          }}
         />
         <button
           type="submit"
-          className="rounded-r-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+          className="h-[42px] rounded-r-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
           disabled={sending || !messageInput.trim()}
         >
           {sending ? 'Sending...' : 'Send'}
