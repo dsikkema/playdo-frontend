@@ -38,6 +38,12 @@ Key components:
 
 ### Installation
 
+Required environment variables:
+
+```bash
+export VITE_PLAYDO_BACKEND_URL='http://localhost:5000'
+```
+
 ```bash
 npm install
 ```
