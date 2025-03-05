@@ -134,7 +134,7 @@ function ConversationView({ conversationId }: ConversationViewProps) {
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault()
-              if (messageInput.trim()) {
+              if (messageInput.trim() && !sending) {
                 handleSendMessage(e)
               }
             }
