@@ -1,0 +1,94 @@
+---
+description: HOW to write Vitest tests, guidance for React component test design
+globs: *.test.tsx,*.test.ts,*.spec.tsx,*.spec.ts
+alwaysApply: false
+---
+# Frontend Test Case Design
+
+## Component Testing Approach
+Focus on testing component interactions and behaviors, not implementation details:
+
+- Mock child components to isolate the component under test
+- Test parent-child interactions through props and callbacks
+- Verify state changes reflect correctly in the UI
+- Use data-testid attributes for test-specific element selection
+
+## Example of Proper Component Test
+
+```tsx
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import ParentComponent from './ParentComponent'
+
+// Mock child components to isolate the component under test
+vi.mock('./ChildComponent', () => ({
+  default: ({ onSelect, selectedId }: { onSelect: (id: number) => void, selectedId: number | null }) => (
+    <div data-testid="child-component">
+      <button
+        onClick={() => onSelect(TEST_ITEM_ID)}
+        data-testid="select-button"
+      >
+        Select Item
+      </button>
+      <div data-testid="selected-item-id">{selectedId}</div>
+    </div>
+  )
+}))
+
+// Constants for test values
+const TEST_ITEM_ID = 42
+
+describe('<ParentComponent />', () => {
+  it('renders child components correctly', () => {
+    // Act
+    render(<ParentComponent />)
+
+    // Assert
+    expect(screen.getByTestId('child-component')).toBeInTheDocument()
+    expect(screen.getByTestId('content-display')).toBeInTheDocument()
+  })
+
+  it('updates state when child component triggers selection', async () => {
+    // Arrange
+    const user = userEvent.setup()
+
+    // Act
+    render(<ParentComponent />)
+
+    // Initially no item is selected
+    expect(screen.getByText('No item selected')).toBeInTheDocument()
+
+    // Trigger selection in child component
+    await user.click(screen.getByTestId('select-button'))
+
+    // Assert
+    expect(screen.getByText(`Viewing item ${TEST_ITEM_ID}`)).toBeInTheDocument()
+    expect(screen.getByTestId('selected-item-id').textContent).toBe(TEST_ITEM_ID.toString())
+  })
+})
+```
+
+## Testing Best Practices
+
+### Component Mocking
+- Mock child components to focus on the component under test
+- Use data-testid attributes for selections instead of relying on text content or DOM structure
+- Implement minimal mock implementations that allow testing the parent-child interaction
+
+### Test Structure
+- Use Arrange-Act-Assert pattern (also known as Given-When-Then)
+- Add descriptive comments for each test phase
+- Keep assertions focused on the specific behavior being tested
+
+### Async Testing
+- Use `async/await` with `userEvent` for interaction testing
+- Verify initial state before interactions
+- Verify state changes after interactions
+- Use `waitFor` when dealing with async updates that don't happen immediately
+
+### Avoiding Common Pitfalls
+- Don't test implementation details, test behaviors
+- Don't rely on internal component state, test what users see
+- Use constants for test values rather than hardcoding them in multiple places
+- Add descriptive comments explaining the testing approach, especially for complex mocking

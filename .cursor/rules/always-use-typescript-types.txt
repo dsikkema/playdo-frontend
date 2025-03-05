@@ -1,0 +1,27 @@
+---
+description: When writing TypeScript/React code, ALWAYS use proper type annotations
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+
+# ALWAYS use proper TypeScript typing
+
+When writing functions, components, or declaring variables:
+[ ] Make sure parameters and props are properly typed
+[ ] Make sure return values are typed
+[ ] Use appropriate interfaces or type aliases for complex structures
+[ ] Use union types with null/undefined instead of any
+[ ] Nullable values should be typed as Type | null or Type | undefined
+
+React component example:
+```tsx
+interface UserProfileProps {
+  username: string;
+  age: number;
+  isActive?: boolean; // Optional prop
+}
+
+const UserProfile: React.FC<UserProfileProps> = ({ username, age, isActive = false }) => {
+  // Component implementation
+};
+```

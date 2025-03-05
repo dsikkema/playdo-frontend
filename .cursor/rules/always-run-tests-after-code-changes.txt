@@ -1,0 +1,9 @@
+---
+description: Run tests after changing ANY React/TypeScript code ALWAYS
+globs: *.tsx,*.ts,*.jsx,*.js
+alwaysApply: false
+---
+# Run tests
+After ANY code changes to React/TypeScript files, run tests IMMEDIATELY using `npm run test`
+
+Tests are your first line of defense against regressions and bugs. DO NOT skip this step.

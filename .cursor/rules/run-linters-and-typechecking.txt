@@ -1,0 +1,15 @@
+---
+description: After changing React/TypeScript code, ALWAYS run linters and type checking
+globs: *.tsx,*.ts,*.jsx,*.js
+alwaysApply: false
+---
+
+# Linters and type checking
+
+If you changed any TypeScrpt/React code, ALWAYS:
+[ ] Run type checking: `npm run typecheck`
+[ ] Run linter: `npm run lint --fix` (Note: PLEASE DO use `--fix` so it automatically fixes issues when possible)
+[ ] Format code: `npm run format` (if available) or use editor's format command
+[ ] As mentioned by other rules, still also run tests: `npm run test`
+
+DO NOT commit code that has type errors or linting issues. Fix ALL errors and warnings before committing.

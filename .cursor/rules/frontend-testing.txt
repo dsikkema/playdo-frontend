@@ -1,0 +1,23 @@
+---
+description: When to write Vitest tests for React/TypeScript files
+globs: *.tsx,*.ts
+alwaysApply: false
+---
+# Frontend Tests
+
+## When to write new tests, new test cases, or update existing test cases
+When adding components, fixing bugs, or making any changes, ALWAYS write automated tests with Vitest that logically cover the change. Run tests to verify they pass using `npm run test`.
+
+Test files should follow the naming convention:
+- `ComponentName.test.tsx` for component tests
+- `fileName.test.ts` for utility/service tests
+
+A bug is NOT fixed until a test proves that it's fixed, that would have failed without fixing the bug.
+
+## What to test
+- Components: Test rendering, user interactions, and component state changes
+- Services: Test API calls, data transformation, and error handling
+- Utilities: Test pure functions and their edge cases
+- Hooks: Test custom hooks with `@testing-library/react-hooks`
+
+Tests should be COMPREHENSIVE and cover edge cases, not just the happy path.
