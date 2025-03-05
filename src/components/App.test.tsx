@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
+import { act } from 'react'
 import App from './App'
 
 // Note: deleted previous implementation that mocked api out, because App doesn't directly use api,
@@ -72,9 +73,11 @@ vi.mock('./CodeEditor', () => ({
 }))
 
 describe('<App />', () => {
-  it('renders the ConversationSelector, CodeEditor, and ConversationView components', () => {
+  it('renders the ConversationSelector, CodeEditor, and ConversationView components', async () => {
     // Act
-    render(<App />)
+    await act(async () => {
+      render(<App />)
+    })
 
     // Assert
     expect(screen.getByTestId('conversation-selector')).toBeInTheDocument()
@@ -87,13 +90,17 @@ describe('<App />', () => {
     const user = userEvent.setup()
 
     // Act
-    render(<App />)
+    await act(async () => {
+      render(<App />)
+    })
 
     // Initially, no conversation is selected
     expect(screen.getByText('No conversation selected')).toBeInTheDocument()
 
     // Select a conversation
-    await user.click(screen.getByTestId('select-conversation-button'))
+    await act(async () => {
+      await user.click(screen.getByTestId('select-conversation-button'))
+    })
 
     // Assert
     // Note: assertion is based on the text supplied in the mocked child component.
@@ -103,9 +110,11 @@ describe('<App />', () => {
     expect(screen.getByTestId('selected-id').textContent).toBe('1')
   })
 
-  it('initializes the CodeEditor with default code', () => {
+  it('initializes the CodeEditor with default code', async () => {
     // Act
-    render(<App />)
+    await act(async () => {
+      render(<App />)
+    })
 
     // Assert
     const textareaElement = screen.getByTestId('code-editor-textarea')

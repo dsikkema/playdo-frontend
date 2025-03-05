@@ -1,0 +1,56 @@
+---
+description: HOW to write automated tests.
+globs: *.test.tsx, *.test.ts
+alwaysApply: false
+---
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { act } from 'react'
+import ParentComponent from './ParentComponent'
+
+describe('<ParentComponent />', () => {
+  it('renders child components correctly', async () => {
+    // Act
+    await act(async () => {
+      render(<ParentComponent />)
+    })
+
+    // Assert
+    expect(screen.getByTestId('child-component')).toBeInTheDocument()
+  })
+
+  it('updates state when child component triggers selection', async () => {
+    // Arrange
+    const user = userEvent.setup()
+
+    // Act
+    const TEST_ITEM_ID = 1
+    await act(async () => {
+      render(<ParentComponent itemId={TEST_ITEM_ID}/>)
+    })
+
+    // Initially no item is selected
+    expect(screen.getByText('No item selected')).toBeInTheDocument()
+
+    // Trigger selection in child component
+    await user.click(screen.getByTestId('select-button'))
+
+    // Assert
+    expect(screen.getByText(`Viewing item ${TEST_ITEM_ID}`)).toBeInTheDocument()
+    expect(screen.getByTestId('selected-item-id').textContent).toBe(TEST_ITEM_ID.toString())
+  })
+})
+
+### Test Structure
+- Use the act() function from React to ensure all updates to your component (like state changes, effects, and DOM updates) are processed and applied before making assertions. This prevents test flakiness by ensuring React's rendering and update cycle completes before continuing with the test. Always wrap render() and state-changing operations in act().
+- Use Arrange-Act-Assert pattern (also known as Given-When-Then)
+
+## Test case design
+- Tests should be COMPREHENSIVE and cover edge cases, not just the happy path.
+- When there are a variable number of inputs or outputs (such as a list that may contain multiple messages, multiple
+  users, a map with many key/value pairs, or etcetera), ALWAYS test the cases of zero, one, and many items. Test
+  when the input or result is empty that the expected behavior occurs (even if a validation error is the expected
+  result), and the same when there is only one item, or many items.
+- Think out loud about the possible edge cases, as they relate to null/empty conditions, the boundaries of loops, and
+  the cyclomatic structure of the code being tested. Then write tests for any edge cases you can observe.

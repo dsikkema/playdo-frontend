@@ -1,14 +1,9 @@
-import { Conversation } from '../types'
-
-const backendUrl = import.meta.env['VITE_PLAYDO_BACKEND_URL']
-
-if (!backendUrl) {
-  throw new Error('VITE_PLAYDO_BACKEND_URL is not set')
-}
+import { Conversation, ConversationListResponse } from '../types'
+import { config } from '../config'
 
 export async function fetchConversation(id: number): Promise<Conversation> {
   try {
-    const response = await fetch(`${backendUrl}/api/conversations/${id}`)
+    const response = await fetch(`${config.backendUrl}/api/conversations/${id}`)
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`)
@@ -24,16 +19,65 @@ export async function fetchConversation(id: number): Promise<Conversation> {
 
 export async function fetchConversationIds(): Promise<number[]> {
   try {
-    const response = await fetch(`${backendUrl}/api/conversations`)
+    const response = await fetch(`${config.backendUrl}/api/conversations`)
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`)
+    }
+
+    const data = (await response.json()) as ConversationListResponse
+    return data.conversation_ids
+  } catch (error) {
+    console.error('Error fetching conversation IDs:', error)
+    throw error
+  }
+}
+
+export async function sendMessage(
+  conversationId: number,
+  message: string
+): Promise<Conversation> {
+  try {
+    const response = await fetch(
+      `${config.backendUrl}/api/conversations/${conversationId}/send_message`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message })
+      }
+    )
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`)
     }
 
     const data = await response.json()
-    return data.conversation_ids
+    return data as Conversation
   } catch (error) {
-    console.error('Error fetching conversation IDs:', error)
+    console.error('Error sending message:', error)
+    throw error
+  }
+}
+
+export async function createConversation(): Promise<number> {
+  try {
+    const response = await fetch(`${config.backendUrl}/api/conversations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data.id as number
+  } catch (error) {
+    console.error('Error creating conversation:', error)
     throw error
   }
 }

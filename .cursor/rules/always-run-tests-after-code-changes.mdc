@@ -1,0 +1,32 @@
+---
+description: ALWAYS Run tests, linters, and typechecker
+globs: *.tsx,*.ts,*.jsx,*.js
+alwaysApply: true
+---
+# Mandatory Verification Steps
+
+After ANY code changes, the AI MUST:
+
+1. **Run Linters and Type Checking AUTOMATICALLY**:
+   - ALWAYS run `npm run lint --fix` to fix linting issues and ALWAYS use the `--fix` option.
+   - DO NOT SKIP the `--fix` option in `npm run lint --fix`
+   - ALWAYS run `npm run typecheck` to verify type correctness
+   - ALWAYS run `npm run test` to verify tests pass
+   - If formatting issues persist after running the linter, use `npx prettier --write <file paths>` to fix them
+
+2. **Verification Checkpoints**:
+   - The AI MUST NOT consider a task complete until ALL linting and type checking passes
+   - The AI MUST show the output of these commands to confirm compliance
+   - If any errors remain, the AI MUST fix them before proceeding
+
+3. **Test Verification**:
+   - ALWAYS run `npm run test` after code changes
+   - ALL tests must pass before considering the task complete
+
+4. **Explicit Confirmation**:
+   - The AI MUST explicitly confirm that it has run these checks
+   - The AI MUST include the command outputs in its response
+
+Failure to follow these steps is considered an incomplete response.
+
+Summary: Tests, Linters, Typechecking are MANDATORY and MUST be run AUTOMATICALLY and this is VERY IMPORTANT.

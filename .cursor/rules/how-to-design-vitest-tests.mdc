@@ -1,7 +1,7 @@
 ---
-description: HOW to write Vitest tests, guidance for React component test design
-globs: *.test.tsx,*.test.ts,*.spec.tsx,*.spec.ts
-alwaysApply: false
+description: HOW to write Vitest tests
+globs: *.test.tsx,*.test.ts,*.ts,*.tsx
+alwaysApply: true
 ---
 # Frontend Test Case Design
 
@@ -12,6 +12,13 @@ Focus on testing component interactions and behaviors, not implementation detail
 - Test parent-child interactions through props and callbacks
 - Verify state changes reflect correctly in the UI
 - Use data-testid attributes for test-specific element selection
+- Tests should be COMPREHENSIVE and cover edge cases, not just the happy path.
+- When there are a variable number of inputs or outputs (such as a list that may contain multiple messages, multiple
+  users, a map with many key/value pairs, or etcetera), ALWAYS test the cases of zero, one, and many items. Test
+  when the input or result is empty that the expected behavior occurs (even if a validation error is the expected
+  result), and the same when there is only one item, or many items.
+- When you are ready to write tests, think out loud about the possible edge cases, as they relate to null/empty conditions, the boundaries of loops, and
+  the cyclomatic structure of the code being tested. Then write tests for any edge cases you can observe.
 
 ## Example of Proper Component Test
 
@@ -19,6 +26,7 @@ Focus on testing component interactions and behaviors, not implementation detail
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
+import { act } from 'react'
 import ParentComponent from './ParentComponent'
 
 // Mock child components to isolate the component under test
@@ -40,9 +48,11 @@ vi.mock('./ChildComponent', () => ({
 const TEST_ITEM_ID = 42
 
 describe('<ParentComponent />', () => {
-  it('renders child components correctly', () => {
+  it('renders child components correctly', async () => {
     // Act
-    render(<ParentComponent />)
+    await act(async () => {
+      render(<ParentComponent />)
+    })
 
     // Assert
     expect(screen.getByTestId('child-component')).toBeInTheDocument()
@@ -54,7 +64,9 @@ describe('<ParentComponent />', () => {
     const user = userEvent.setup()
 
     // Act
-    render(<ParentComponent />)
+    await act(async () => {
+      render(<ParentComponent />)
+    })
 
     // Initially no item is selected
     expect(screen.getByText('No item selected')).toBeInTheDocument()
@@ -68,7 +80,6 @@ describe('<ParentComponent />', () => {
   })
 })
 ```
-
 ## Testing Best Practices
 
 ### Component Mocking
@@ -77,6 +88,7 @@ describe('<ParentComponent />', () => {
 - Implement minimal mock implementations that allow testing the parent-child interaction
 
 ### Test Structure
+- Use the act() function from React to ensure all updates to your component (like state changes, effects, and DOM updates) are processed and applied before making assertions. This prevents test flakiness by ensuring React's rendering and update cycle completes before continuing with the test. Always wrap render() and state-changing operations in act().
 - Use Arrange-Act-Assert pattern (also known as Given-When-Then)
 - Add descriptive comments for each test phase
 - Keep assertions focused on the specific behavior being tested
@@ -88,7 +100,13 @@ describe('<ParentComponent />', () => {
 - Use `waitFor` when dealing with async updates that don't happen immediately
 
 ### Avoiding Common Pitfalls
+- NEVER EVER mock the very component or service that you are testing. Alert the user and ask for guidance dealing
+  with difficult mocking situations if there are problems mocking something effectively.
+- DO USE constants for test values rather than hardcoding them in multiple places. All literal test values should be
+  in NAMED consts.
 - Don't test implementation details, test behaviors
 - Don't rely on internal component state, test what users see
-- Use constants for test values rather than hardcoding them in multiple places
-- Add descriptive comments explaining the testing approach, especially for complex mocking
+- Add descriptive code comments explaining the testing approach, especially for complex mocking
+
+### When you may skip tests
+- ONLY when changing just css properties or html-only styling changes, you do not need tests.

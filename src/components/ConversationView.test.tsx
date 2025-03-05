@@ -1,7 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { act } from 'react'
 import ConversationView from './ConversationView'
-import { fetchConversation } from '../services/api'
+import { fetchConversation, sendMessage } from '../services/api'
 import { Conversation } from '../types'
 
 /**
@@ -11,7 +13,8 @@ import { Conversation } from '../types'
  * in below object.
  */
 vi.mock('../services/api', () => ({
-  fetchConversation: vi.fn()
+  fetchConversation: vi.fn(),
+  sendMessage: vi.fn()
 }))
 
 /**
@@ -30,6 +33,11 @@ const mockFetchConversation = fetchConversation as unknown as ReturnType<
   typeof vi.fn
 >
 
+/**
+ * Mock implementation of sendMessage
+ */
+const mockSendMessage = sendMessage as unknown as ReturnType<typeof vi.fn>
+
 describe('<ConversationView />', () => {
   // Reset mocks before each test
   beforeEach(() => {
@@ -37,9 +45,11 @@ describe('<ConversationView />', () => {
   })
 
   // Test case for null conversationId
-  it('shows "select a conversation" message when no conversation is selected', () => {
+  it('shows "select a conversation" message when no conversation is selected', async () => {
     // Act
-    render(<ConversationView conversationId={null} />)
+    await act(async () => {
+      render(<ConversationView conversationId={null} />)
+    })
 
     // Assert
     expect(
@@ -57,7 +67,9 @@ describe('<ConversationView />', () => {
     const conversationId = 1
 
     // Act
-    render(<ConversationView conversationId={conversationId} />)
+    await act(async () => {
+      render(<ConversationView conversationId={conversationId} />)
+    })
 
     // Assert
     expect(screen.getByText('Loading conversation...')).toBeInTheDocument()
@@ -72,10 +84,11 @@ describe('<ConversationView />', () => {
     const conversationId = 1
 
     // Act
-    render(<ConversationView conversationId={conversationId} />)
+    await act(async () => {
+      render(<ConversationView conversationId={conversationId} />)
+    })
 
     // Assert
-
     /**
      * Note: waitFor() happens because, at first render, there is (or may be) a different state than the one expected.
      * We use hooks related to useState and useEffect to enact re-renders. So, at first, the component may be in the
@@ -107,7 +120,9 @@ describe('<ConversationView />', () => {
     const conversationId = 1
 
     // Act
-    render(<ConversationView conversationId={conversationId} />)
+    await act(async () => {
+      render(<ConversationView conversationId={conversationId} />)
+    })
 
     // Assert
     await waitFor(() => {
@@ -134,7 +149,9 @@ describe('<ConversationView />', () => {
 
     // Act
     const conversationId = 1
-    render(<ConversationView conversationId={conversationId} />)
+    await act(async () => {
+      render(<ConversationView conversationId={conversationId} />)
+    })
 
     // Assert
     await waitFor(() => {
@@ -171,7 +188,9 @@ describe('<ConversationView />', () => {
 
     // Act
     const conversationId = 2
-    render(<ConversationView conversationId={conversationId} />)
+    await act(async () => {
+      render(<ConversationView conversationId={conversationId} />)
+    })
 
     // Assert
     await waitFor(() => {
@@ -185,5 +204,126 @@ describe('<ConversationView />', () => {
       expect(screen.getByText('That is good to hear.')).toBeInTheDocument()
     })
     expect(mockFetchConversation).toHaveBeenCalledWith(conversationId)
+  })
+
+  // Test case for sending a message
+  it('allows users to send messages', async () => {
+    // Arrange
+    const user = userEvent.setup()
+    const initialConversation: Conversation = {
+      id: 3,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z',
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: 'Initial message' }]
+        }
+      ]
+    }
+
+    const updatedConversation: Conversation = {
+      ...initialConversation,
+      messages: [
+        ...initialConversation.messages,
+        {
+          role: 'user',
+          content: [{ type: 'text', text: 'New message' }]
+        },
+        {
+          role: 'assistant',
+          content: [{ type: 'text', text: 'Response to new message' }]
+        }
+      ]
+    }
+
+    mockFetchConversation.mockResolvedValue(initialConversation)
+    mockSendMessage.mockResolvedValue(updatedConversation)
+
+    const conversationId = 3
+
+    // Act
+    await act(async () => {
+      render(<ConversationView conversationId={conversationId} />)
+    })
+
+    // Wait for the initial conversation to load
+    await waitFor(() => {
+      expect(screen.getByText('Initial message')).toBeInTheDocument()
+    })
+
+    // Type and send a new message
+    const messageInput = screen.getByPlaceholderText('Type your message...')
+    await act(async () => {
+      await user.type(messageInput, 'New message')
+    })
+
+    const sendButton = screen.getByText('Send')
+    await act(async () => {
+      await user.click(sendButton)
+    })
+
+    // Assert
+    await waitFor(() => {
+      // Check that the updated messages are displayed
+      expect(screen.getByText('Response to new message')).toBeInTheDocument()
+    })
+
+    expect(mockSendMessage).toHaveBeenCalledWith(conversationId, 'New message')
+  })
+
+  // Test case for error handling when sending a message
+  it('shows error message when sending a message fails', async () => {
+    // Arrange
+    const user = userEvent.setup()
+    const testConversation: Conversation = {
+      id: 4,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z',
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: 'Initial message' }]
+        }
+      ]
+    }
+
+    mockFetchConversation.mockResolvedValue(testConversation)
+    mockSendMessage.mockRejectedValue(new Error('Failed to send message'))
+
+    const conversationId = 4
+
+    // Act
+    await act(async () => {
+      render(<ConversationView conversationId={conversationId} />)
+    })
+
+    // Wait for the initial conversation to load
+    await waitFor(() => {
+      expect(screen.getByText('Initial message')).toBeInTheDocument()
+    })
+
+    // Type and send a new message
+    const messageInput = screen.getByPlaceholderText('Type your message...')
+    await act(async () => {
+      await user.type(messageInput, 'This will fail')
+    })
+
+    const sendButton = screen.getByText('Send')
+    await act(async () => {
+      await user.click(sendButton)
+    })
+
+    // Assert
+    await waitFor(() => {
+      expect(
+        screen.getByText('Failed to send message. Please try again.')
+      ).toBeInTheDocument()
+    })
+
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      conversationId,
+      'This will fail'
+    )
   })
 })
