@@ -1,0 +1,106 @@
+import { useState, useCallback } from 'react'
+import pyodideService, {
+  ExecutionResult,
+  PyodideStatus
+} from '../services/pyodide'
+
+interface UsePythonExecutionState {
+  result: ExecutionResult | null
+  isLoading: boolean
+  status: PyodideStatus
+  error: Error | null
+}
+
+export function usePythonExecution() {
+  const [state, setState] = useState<UsePythonExecutionState>({
+    result: null,
+    isLoading: false,
+    status: pyodideService.getStatus(),
+    error: null
+  })
+
+  // Initialize Pyodide if not already initialized
+  const initialize = useCallback(async () => {
+    if (
+      state.status === PyodideStatus.UNINITIALIZED ||
+      state.status === PyodideStatus.ERROR
+    ) {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true }))
+        await pyodideService.initialize()
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          status: pyodideService.getStatus(),
+          error: null
+        }))
+      } catch (error) {
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          status: PyodideStatus.ERROR,
+          error:
+            error instanceof Error
+              ? error
+              : new Error('Failed to initialize Pyodide')
+        }))
+      }
+    }
+  }, [state.status])
+
+  // Execute Python code
+  const executeCode = useCallback(
+    async (code: string) => {
+      try {
+        // Set loading state
+        setState((prev) => ({ ...prev, isLoading: true }))
+
+        // Initialize if needed
+        if (state.status === PyodideStatus.UNINITIALIZED) {
+          await initialize()
+        }
+
+        // Execute the code
+        const result = await pyodideService.executeCode(code)
+
+        // Update state with results
+        setState((prev) => ({
+          ...prev,
+          result,
+          isLoading: false,
+          error: null
+        }))
+
+        return result
+      } catch (error) {
+        // Handle execution errors
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error:
+            error instanceof Error
+              ? error
+              : new Error('Failed to execute code'),
+          result: {
+            stdout: '',
+            stderr: '',
+            error: error instanceof Error ? error.message : String(error),
+            result: null
+          }
+        }))
+
+        // Re-throw for caller to handle if needed
+        throw error
+      }
+    },
+    [initialize, state.status]
+  )
+
+  return {
+    executeCode,
+    initialize,
+    ...state
+  }
+}
+
+export default usePythonExecution

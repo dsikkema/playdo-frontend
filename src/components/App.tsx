@@ -1,8 +1,10 @@
 // src/components/App.tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ConversationView from './ConversationView'
 import ConversationSelector from './ConversationSelector'
 import CodeEditor from './CodeEditor'
+import OutputDisplay from './OutputDisplay'
+import usePythonExecution from '../hooks/usePythonExecution'
 
 function App() {
   const [selectedConversationId, setSelectedConversationId] = useState<
@@ -11,6 +13,21 @@ function App() {
   const [code, setCode] = useState(
     "# Write your Python code here\nprint('Hello, Playdo!')"
   )
+
+  const { executeCode, initialize, result, isLoading } = usePythonExecution()
+
+  // Initialize Pyodide on component mount
+  useEffect(() => {
+    initialize()
+  }, [initialize])
+
+  const handleRunCode = async () => {
+    try {
+      await executeCode(code)
+    } catch (error) {
+      console.error('Failed to execute code:', error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -23,8 +40,34 @@ function App() {
           selectedConversationId={selectedConversationId}
         />
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="h-[60vh]">
-            <CodeEditor initialCode={code} onChange={setCode} />
+          <div className="flex h-auto flex-col space-y-4">
+            <div className="relative h-[60vh]">
+              <CodeEditor initialCode={code} onChange={setCode} />
+              <button
+                onClick={handleRunCode}
+                disabled={isLoading}
+                className="absolute bottom-4 right-4 rounded-full bg-green-500 p-3 text-white shadow-lg transition hover:bg-green-600 disabled:bg-green-300"
+                data-testid="run-code-button"
+                aria-label="Run code"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="size-6"
+                >
+                  <path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347c-.75.412-1.667-.13-1.667-.986V5.653Z" />
+                </svg>
+              </button>
+            </div>
+            <div className="h-[30vh]">
+              <OutputDisplay
+                stdout={result?.stdout || ''}
+                stderr={result?.stderr || ''}
+                error={result?.error || null}
+                isLoading={isLoading}
+              />
+            </div>
           </div>
           <div className="flex h-[60vh] flex-col">
             <ConversationView conversationId={selectedConversationId} />
