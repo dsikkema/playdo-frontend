@@ -61,10 +61,7 @@ export class PyodideRunner {
    * Execute Python code and return the result
    * This method doesn't maintain any state between calls
    */
-  public async executeCode(
-    code: string,
-    outputHandlers?: OutputHandlers
-  ): Promise<ExecutionResult> {
+  public async executeCode(code: string): Promise<ExecutionResult> {
     if (!this.pyodide) {
       await this.initialize()
     }
@@ -81,7 +78,6 @@ export class PyodideRunner {
     this.pyodide.setStdout({
       batched: (output: string) => {
         stdoutBuffer.push(output)
-        outputHandlers?.onStdout?.(output)
       }
     })
 
@@ -89,7 +85,6 @@ export class PyodideRunner {
     this.pyodide.setStderr({
       batched: (output: string) => {
         stderrBuffer.push(output)
-        outputHandlers?.onStderr?.(output)
       }
     })
 
@@ -107,8 +102,8 @@ export class PyodideRunner {
         error: null,
         result
       }
-    } catch (error: unknown) {
-      // Collect output even in case of error
+    } catch (error) {
+      // Collect output even if execution failed
       const stdout: string = stdoutBuffer.join('\n')
       const stderr: string = stderrBuffer.join('\n')
 
@@ -117,12 +112,6 @@ export class PyodideRunner {
         stderr,
         error: error instanceof Error ? error.message : String(error),
         result: null
-      }
-    } finally {
-      // Restore original handlers
-      if (this.pyodide) {
-        this.pyodide.setStdout({})
-        this.pyodide.setStderr({})
       }
     }
   }

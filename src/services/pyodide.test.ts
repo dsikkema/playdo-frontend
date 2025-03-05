@@ -1,10 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { PyodideRunner, createPyodideRunner } from './pyodide'
+import type { Mock } from 'vitest'
 
-// Mock the loadPyodide function
+// Define a simple type for Pyodide's output options
+interface PyodideOutputOptions {
+  batched?: (output: string) => void
+}
+
+// Define a type for our mocked pyodide instance
+interface MockPyodideInstance {
+  runPythonAsync: Mock
+  setStdout: Mock
+  setStderr: Mock
+}
+
+// Mock the pyodide module
 vi.mock('pyodide', () => {
   const mockPyodideInstance = {
-    runPython: vi.fn(),
     runPythonAsync: vi.fn(),
     setStdout: vi.fn(),
     setStderr: vi.fn()
@@ -17,166 +29,143 @@ vi.mock('pyodide', () => {
 
 describe('PyodideRunner', () => {
   let pyodideRunner: PyodideRunner
+  let mockPyodideInstance: MockPyodideInstance
 
   beforeEach(async () => {
-    // Reset mocks
     vi.clearAllMocks()
 
-    // Create a new instance for each test
+    // Create a fresh instance for each test
     pyodideRunner = createPyodideRunner()
 
-    // Mock the runPythonAsync implementation
+    // Get the mock instance
     const { loadPyodide } = await import('pyodide')
-    const pyodideInstance = await loadPyodide()
+    mockPyodideInstance =
+      (await loadPyodide()) as unknown as MockPyodideInstance
 
-    // Default implementation for successful execution
-    vi.mocked(pyodideInstance.runPythonAsync).mockImplementation(
-      (code: string) => {
-        if (code.includes('raise')) {
-          throw new Error('Python error occurred')
-        }
-        return Promise.resolve('Python execution result')
-      }
-    )
-
-    // Mock setStdout and setStderr to simulate output collection
-    // Using any here because we're in tests and exact typing of the mock isn't critical
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(pyodideInstance.setStdout).mockImplementation((options: any) => {
-      if (options && typeof options.batched === 'function') {
-        // Only simulate output if we're executing code that would produce output
-        // We'll manually trigger this in specific tests
-      }
-    })
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(pyodideInstance.setStderr).mockImplementation((options: any) => {
-      if (options && typeof options.batched === 'function') {
-        // Only simulate output if we're executing code that would produce output
-        // We'll manually trigger this in specific tests
-      }
-    })
+    // Default success implementation
+    mockPyodideInstance.runPythonAsync.mockResolvedValue('success result')
   })
 
   afterEach(() => {
     vi.clearAllMocks()
   })
 
+  it('should initialize Pyodide properly', async () => {
+    // Reset call count before this test
+    const { loadPyodide } = await import('pyodide')
+    vi.mocked(loadPyodide).mockClear()
+
+    // Act
+    await pyodideRunner.initialize()
+
+    // Assert
+    expect(loadPyodide).toHaveBeenCalledTimes(1)
+  })
+
   it('should execute code and capture stdout', async () => {
     // Arrange
     await pyodideRunner.initialize()
 
-    const { loadPyodide } = await import('pyodide')
-    const pyodideInstance = await loadPyodide()
-
-    // Setup stdout simulation for this test
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(pyodideInstance.setStdout).mockImplementation((options: any) => {
-      if (options && typeof options.batched === 'function') {
-        // Simulate stdout output
-        options.batched('Hello, Pyodide!')
+    // Mock stdout capture
+    mockPyodideInstance.setStdout.mockImplementation(
+      (options: PyodideOutputOptions) => {
+        if (options && typeof options.batched === 'function') {
+          options.batched('Hello from stdout')
+        }
       }
-    })
+    )
 
-    const code = 'print("Hello, Pyodide!")'
+    // Reset stderr to avoid test interference
+    mockPyodideInstance.setStderr.mockImplementation(() => {})
 
     // Act
-    const result = await pyodideRunner.executeCode(code)
+    const result = await pyodideRunner.executeCode('print("test")')
 
     // Assert
-    expect(result.stdout).toContain('Hello, Pyodide!')
+    expect(mockPyodideInstance.runPythonAsync).toHaveBeenCalledWith(
+      'print("test")'
+    )
+    expect(result.stdout).toBe('Hello from stdout')
     expect(result.stderr).toBe('')
     expect(result.error).toBeNull()
-    expect(result.result).toBe('Python execution result')
+    expect(result.result).toBe('success result')
   })
 
-  it('should handle Python errors correctly', async () => {
+  it('should execute code and capture stderr', async () => {
     // Arrange
     await pyodideRunner.initialize()
 
-    const { loadPyodide } = await import('pyodide')
-    const pyodideInstance = await loadPyodide()
+    // Reset stdout to avoid test interference
+    mockPyodideInstance.setStdout.mockImplementation(() => {})
 
-    // Setup stderr simulation for this test
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(pyodideInstance.setStderr).mockImplementation((options: any) => {
-      if (options && typeof options.batched === 'function') {
-        // Simulate stderr output
-        options.batched('Error traceback')
+    // Mock stderr capture
+    mockPyodideInstance.setStderr.mockImplementation(
+      (options: PyodideOutputOptions) => {
+        if (options && typeof options.batched === 'function') {
+          options.batched('Error output')
+        }
       }
-    })
-
-    const code = 'raise Exception("This is a test error")'
+    )
 
     // Act
-    const result = await pyodideRunner.executeCode(code)
+    const result = await pyodideRunner.executeCode(
+      'import sys; sys.stderr.write("error")'
+    )
 
     // Assert
-    expect(result.stderr).toContain('Error traceback')
-    expect(result.error).toContain('Python error occurred')
+    expect(result.stderr).toBe('Error output')
+    expect(result.stdout).toBe('')
+    expect(result.error).toBeNull()
+  })
+
+  it('should handle execution errors correctly', async () => {
+    // Arrange
+    await pyodideRunner.initialize()
+
+    // Mock an error during execution
+    mockPyodideInstance.runPythonAsync.mockRejectedValue(
+      new Error('Python error')
+    )
+
+    // Reset stdout to avoid test interference
+    mockPyodideInstance.setStdout.mockImplementation(() => {})
+
+    // Mock stderr for the error case
+    mockPyodideInstance.setStderr.mockImplementation(
+      (options: PyodideOutputOptions) => {
+        if (options && typeof options.batched === 'function') {
+          options.batched('Traceback information')
+        }
+      }
+    )
+
+    // Act
+    const result = await pyodideRunner.executeCode('raise Exception("error")')
+
+    // Assert
+    expect(result.error).toBe('Python error')
+    expect(result.stderr).toBe('Traceback information')
     expect(result.result).toBeNull()
   })
 
-  it('should handle empty code input', async () => {
-    // Arrange
-    await pyodideRunner.initialize()
+  it('should initialize automatically when executing code', async () => {
+    // Reset call count before this test
+    const { loadPyodide } = await import('pyodide')
+    vi.mocked(loadPyodide).mockClear()
 
-    // Act
-    const result = await pyodideRunner.executeCode('')
+    // Act - note we're not calling initialize() first
+    await pyodideRunner.executeCode('print("test")')
 
     // Assert
-    expect(result.stdout).toBe('')
-    expect(result.stderr).toBe('')
-    expect(result.error).toBeNull()
+    expect(loadPyodide).toHaveBeenCalledTimes(1)
   })
 
-  it('should call output handlers when provided', async () => {
+  it('should handle initialization errors', async () => {
     // Arrange
-    await pyodideRunner.initialize()
-
     const { loadPyodide } = await import('pyodide')
-    const pyodideInstance = await loadPyodide()
-
-    // Setup stdout/stderr simulation
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(pyodideInstance.setStdout).mockImplementation((options: any) => {
-      if (options && typeof options.batched === 'function') {
-        options.batched('Stdout message')
-      }
-    })
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(pyodideInstance.setStderr).mockImplementation((options: any) => {
-      if (options && typeof options.batched === 'function') {
-        options.batched('Stderr message')
-      }
-    })
-
-    // Create mock handlers
-    const onStdout = vi.fn()
-    const onStderr = vi.fn()
-
-    // Act
-    await pyodideRunner.executeCode('print("test")', { onStdout, onStderr })
-
-    // Assert
-    expect(onStdout).toHaveBeenCalledWith('Stdout message')
-    expect(onStderr).toHaveBeenCalledWith('Stderr message')
-  })
-
-  it('should throw an error if Pyodide initialization fails', async () => {
-    // Arrange - setup loadPyodide to fail
-    const { loadPyodide } = await import('pyodide')
-    vi.mocked(loadPyodide).mockRejectedValueOnce(
-      new Error('Initialization failed')
-    )
-
-    // Create a new instance that will fail to initialize
-    const failingRunner = createPyodideRunner()
+    vi.mocked(loadPyodide).mockRejectedValueOnce(new Error('Failed to load'))
 
     // Act & Assert
-    await expect(failingRunner.initialize()).rejects.toThrow(
-      'Initialization failed'
-    )
+    await expect(pyodideRunner.initialize()).rejects.toThrow('Failed to load')
   })
 })
