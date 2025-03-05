@@ -1,10 +1,10 @@
-# PlayDo Architecture
+# Playdo Architecture
 
-This document outlines the architecture for PlayDo, an integrated learning environment designed for high school students learning Python. The architecture described here aims to balance quick MVP development with sound architectural decisions that will allow for future expansion.
+This document outlines the architecture for Playdo, an integrated learning environment designed for high school students learning Python. The architecture described here aims to balance quick MVP development with sound architectural decisions that will allow for future expansion.
 
 ## System Overview
 
-PlayDo is a web application with a clear separation between frontend and backend components:
+Playdo is a web application with a clear separation between frontend and backend components:
 
 - **Frontend**: React/TypeScript application that provides the user interface, code editor, and handles Python code execution via Pyodide (WASM)
 - **Backend**: Flask/Python API that manages conversations with the Claude AI, stores conversation history, and tracks learning progress
@@ -14,6 +14,7 @@ The application follows a client-server architecture with the frontend making AP
 ## Technology Stack
 
 ### Frontend
+
 - **Framework**: React 19 with TypeScript
 - **Build/Dev Tool**: Vite
 - **State Management**: React Context API
@@ -23,6 +24,7 @@ The application follows a client-server architecture with the frontend making AP
 - **Testing**: Jest + React Testing Library
 
 ### Backend
+
 - **Framework**: Flask
 - **Database**: SQLite (with SQLAlchemy ORM)
 - **AI Integration**: Anthropic Claude API (via Python SDK)
@@ -33,35 +35,45 @@ The application follows a client-server architecture with the frontend making AP
 ## Architecture Decisions
 
 ### Client-Side Python Execution
+
 Pyodide allows Python code to run directly in the browser, eliminating the need for server-side execution. This decision:
+
 - Reduces server load and infrastructure costs
 - Removes security concerns associated with executing untrusted code on the server
 - Provides immediate feedback to students without network latency
 - Enables a more responsive user experience
 
 ### Backend as API + LLM Proxy
+
 The backend serves as both a REST API for data persistence and a proxy for Claude API interactions. This pattern:
+
 - Secures API keys
 - Allows for rate limiting and cost control
 - Enables pre/post-processing of prompts and responses
 - Provides a foundation for future authentication and multi-user support
 
 ### SQLite for Data Storage
+
 Using SQLite for the MVP simplifies development while maintaining a path to more robust database solutions:
+
 - Zero configuration required
 - File-based storage (no separate database server)
 - SQLAlchemy abstraction allows easy migration to PostgreSQL when needed
 - Sufficient performance for dozens of concurrent users
 
 ### React Context for State Management
+
 React Context provides a simpler approach to state management than alternatives like Redux:
+
 - Reduced boilerplate code
 - Native React solution with no additional dependencies
 - Sufficient for the current application complexity
 - Easier testing setup
 
 ### TypeScript for Frontend Development
+
 TypeScript provides static typing which:
+
 - Catches type-related errors during development
 - Improves IDE support and code completion
 - Creates self-documenting interfaces between components
@@ -118,6 +130,7 @@ backend/playdo/
 ## Data Models
 
 ### Conversation Model
+
 ```python
 class Conversation(Base):
     __tablename__ = 'conversations'
@@ -131,6 +144,7 @@ class Conversation(Base):
 ```
 
 ### Message Model
+
 ```python
 class Message(Base):
     __tablename__ = 'messages'
@@ -145,6 +159,7 @@ class Message(Base):
 ```
 
 ### Code Snippet Model
+
 ```python
 class CodeSnippet(Base):
     __tablename__ = 'code_snippets'
@@ -178,6 +193,7 @@ class CodeSnippet(Base):
 ## Data Flow
 
 ### Code Execution Flow
+
 1. User writes Python code in the CodeEditor component
 2. User clicks the "Run" button
 3. Frontend passes code to the Pyodide runtime
@@ -186,6 +202,7 @@ class CodeSnippet(Base):
 6. (Optional) Code and output are sent to backend for storage in the conversation context
 
 ### Conversation Flow
+
 1. User enters a message in the ChatInterface component
 2. Frontend sends message to backend API
 3. Backend stores the message and prepares context for Claude:
@@ -199,6 +216,7 @@ class CodeSnippet(Base):
 ## Development Workflow
 
 ### Setup and Installation
+
 1. Clone the repository
 2. Install frontend dependencies:
    ```
@@ -216,6 +234,7 @@ class CodeSnippet(Base):
    ```
 
 ### Development
+
 1. Start the frontend development server:
    ```
    cd frontend
@@ -228,15 +247,18 @@ class CodeSnippet(Base):
    ```
 
 ### Linting and Formatting
-Maintaining code quality and consistency is essential for collaborative development. PlayDo uses Ruff for Python linting and formatting:
+
+Maintaining code quality and consistency is essential for collaborative development. Playdo uses Ruff for Python linting and formatting:
 
 1. Run linting to check for code issues:
+
    ```
    cd backend
    uv run ruff check .
    ```
 
 2. Run formatting to automatically fix code style:
+
    ```
    cd backend
    uv run ruff format .
@@ -249,6 +271,7 @@ Maintaining code quality and consistency is essential for collaborative developm
    ```
 
 Ruff is chosen for its:
+
 - Speed (10-100x faster than traditional Python linters)
 - Comprehensive rule set that replaces multiple tools (flake8, black, isort, etc.)
 - Automatic fixing capabilities
@@ -257,9 +280,8 @@ Ruff is chosen for its:
 
 All Python code must pass typechecking, linting, and formatting checks before being committed to ensure consistent code quality throughout the project.
 
-
-
 ### Testing
+
 - Frontend tests:
   ```
   cd frontend
@@ -286,15 +308,18 @@ While not part of the MVP, future deployment should consider:
 ## Future Considerations
 
 ### Authentication
+
 - Implement user authentication for multi-user support
 - Track user-specific learning progress
 - Enforce resource limits per user
 
 ### Database Migration
+
 - Migrate from SQLite to PostgreSQL for production use
 - Implement proper database migration workflow
 
 ### Advanced Features
+
 - Expand the curriculum DAG
 - Add code visualization tools
 - Implement multi-user classroom functionality
@@ -303,12 +328,14 @@ While not part of the MVP, future deployment should consider:
 ## Technical Limitations and Tradeoffs
 
 ### Pyodide Limitations
+
 - Initial load time (several MB of WASM to download)
 - Limited Python package support
 - Slight differences from standard Python behavior
 - Not suitable for CPU-intensive computations
 
 ### Claude API Considerations
+
 - API key management and security
 - Cost implications for high usage
 - Rate limiting and error handling
@@ -317,4 +344,4 @@ While not part of the MVP, future deployment should consider:
 
 This architecture provides a foundation for rapid MVP development while maintaining a clear path for future enhancements. The separation of frontend and backend concerns, along with the use of Pyodide for client-side Python execution, creates a responsive learning environment that can be deployed with minimal server resources.
 
-By leveraging modern web technologies and focusing on a clean, maintainable codebase, PlayDo can quickly provide value to students while establishing the technical foundation for future growth.
+By leveraging modern web technologies and focusing on a clean, maintainable codebase, Playdo can quickly provide value to students while establishing the technical foundation for future growth.

@@ -1,8 +1,8 @@
-# PlayDo: A Gentle Path to Learning Python
+# Playdo: A Gentle Path to Learning Python
 
 ## Core Vision
 
-PlayDo is an integrated learning environment designed for high school students learning to code in Python. It combines a code editor, execution environment, and an AI assistant in one minimalist interface that emphasizes hands-on exploration and gentle guidance.
+Playdo is an integrated learning environment designed for high school students learning to code in Python. It combines a code editor, execution environment, and an AI assistant in one minimalist interface that emphasizes hands-on exploration and gentle guidance.
 
 Our approach stands apart from traditional programming education by focusing on responsiveness, natural curiosity, and removing unnecessary frustration. We believe that learning to code should be accessible to everyone, not just those with high frustration tolerance or innate technical intuition.
 
@@ -10,9 +10,10 @@ Our approach stands apart from traditional programming education by focusing on 
 
 ### Gentle Minimalism
 
-The UI is deliberately sleek and uncluttered, with three main components: a code editor on the left, a chat interface with the PlayDo AI on the right, and a prominently displayed green run button. When code runs, the output appears in a fourth section beneath the code editor.
+The UI is deliberately sleek and uncluttered, with three main components: a code editor on the left, a chat interface with the Playdo AI on the right, and a prominently displayed green run button. When code runs, the output appears in a fourth section beneath the code editor.
 
 This minimalist design serves multiple purposes:
+
 - Reduces cognitive load for beginners
 - Eliminates intimidating technical complexity
 - Keeps focus on the essential learning experience
@@ -22,13 +23,14 @@ This minimalist design serves multiple purposes:
 
 The foundation of our approach is hands-on, practical application. Students type every character of code themselves, run it, observe the results, and make their own modifications. This creates a visceral connection to the code that no amount of passive learning can match.
 
-The PlayDo AI doesn't just tell students about programming concepts—it guides them to discover these concepts through direct application, leading to deeper understanding and better retention.
+The Playdo AI doesn't just tell students about programming concepts—it guides them to discover these concepts through direct application, leading to deeper understanding and better retention.
 
 ### Gentle Guidance
 
-We firmly believe in making coding accessible by removing unnecessary barriers while preserving the authentic learning experience. The PlayDo AI provides clear, specific guidance when errors occur—explaining what went wrong and how to fix it without writing the exact solution code.
+We firmly believe in making coding accessible by removing unnecessary barriers while preserving the authentic learning experience. The Playdo AI provides clear, specific guidance when errors occur—explaining what went wrong and how to fix it without writing the exact solution code.
 
 This approach strikes a balance between:
+
 - Preventing the frustration that causes many beginners to abandon programming
 - Building the problem-solving skills necessary for independent coding
 
@@ -43,7 +45,7 @@ As one of our guiding principles states: "We're hippies, and we're going to make
 - Output display showing results of code execution
 - Immediate error feedback through both runtime output and AI guidance
 
-### PlayDo AI Assistant
+### Playdo AI Assistant
 
 - Personalized interaction that begins by learning the student's name
 - Guidance tailored to individual learning styles and interests
@@ -68,17 +70,18 @@ As one of our guiding principles states: "We're hippies, and we're going to make
 
 ## User Experience Flow
 
-1. **Initial Welcome**: PlayDo introduces itself and asks for the student's name
+1. **Initial Welcome**: Playdo introduces itself and asks for the student's name
 2. **First Steps**: Gentle guidance toward an initial "Hello World" or similar exercise
-3. **Guided Exploration**: Based on DAG curriculum, PlayDo suggests possible learning paths
+3. **Guided Exploration**: Based on DAG curriculum, Playdo suggests possible learning paths
 4. **Hands-on Practice**: Student writes code, runs it, and observes output
-5. **Responsive Assistance**: PlayDo offers context-aware help for errors or questions
+5. **Responsive Assistance**: Playdo offers context-aware help for errors or questions
 6. **Adaptive Learning**: Subsequent topics suggested based on demonstrated mastery and interest
 7. **Session Closure**: Recognition of completed concepts with option to save and continue later
 
 ## Technical Context Considerations
 
 The LLM's context window will include:
+
 - Current code in the editor
 - Recent output from code execution
 - Recent conversation history with the student
@@ -87,14 +90,16 @@ The LLM's context window will include:
 - Current lesson objectives
 - Previous code examples relevant to current topic
 
-This context allows PlayDo to:
+This context allows Playdo to:
+
 - Identify patterns in the student's coding style
 - Recognize errors in context
 - Adapt examples to match demonstrated interests
 - Build upon concepts the student has mastered
 - Reference back to previous work when relevant
 
-PlayDo will maintain and update:
+Playdo will maintain and update:
+
 - A progress file tracking mastered topics in the DAG
 - A preferences file recording identified interests and learning patterns
 - A session history allowing review of past lessons and code
@@ -102,6 +107,7 @@ PlayDo will maintain and update:
 ## Beyond the MVP
 
 While our initial focus is on a streamlined single-user experience, future enhancements may include:
+
 - Visual representation of progress through the curriculum DAG
 - Expanded visualization tools (turtle graphics, simple plotting)
 - More sophisticated project saving and organization
@@ -110,6 +116,6 @@ While our initial focus is on a streamlined single-user experience, future enhan
 
 ## Conclusion
 
-PlayDo represents a fundamentally different approach to teaching programming—one built around responsiveness, curiosity, and removing unnecessary frustration. By combining hands-on practice with gentle, personalized guidance, we aim to make the joy of coding accessible to all students, not just those who thrive in traditional learning environments.
+Playdo represents a fundamentally different approach to teaching programming—one built around responsiveness, curiosity, and removing unnecessary frustration. By combining hands-on practice with gentle, personalized guidance, we aim to make the joy of coding accessible to all students, not just those who thrive in traditional learning environments.
 
-We believe coding is for everyone, and PlayDo is our path to making that belief a reality.
+We believe coding is for everyone, and Playdo is our path to making that belief a reality.

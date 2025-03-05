@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchConversationIds } from '../services/api'
+import { fetchConversationIds, createConversation } from '../services/api'
 
 type ConversationSelectorProps = {
   selectedConversationId: number | null
@@ -13,22 +13,24 @@ function ConversationSelector({
   const [conversationIds, setConversationIds] = useState<number[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
+  const [creatingConversation, setCreatingConversation] =
+    useState<boolean>(false)
+
+  const loadConversationIds = async () => {
+    try {
+      setLoading(true)
+      const ids = await fetchConversationIds()
+      setConversationIds(ids)
+      setError(null)
+    } catch (e) {
+      setError('Failed to load conversations, please try again.')
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    async function loadConversationIds() {
-      try {
-        setLoading(true)
-        const ids = await fetchConversationIds()
-        setConversationIds(ids)
-        setError(null)
-      } catch (e) {
-        setError('Failed to load conversation, please try again.')
-        console.error(e)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     loadConversationIds()
   }, [])
 
@@ -45,6 +47,25 @@ function ConversationSelector({
     }
   }
 
+  const handleCreateConversation = async () => {
+    try {
+      setCreatingConversation(true)
+      setError(null)
+      const newConversationId = await createConversation()
+
+      // Refresh the conversation list
+      await loadConversationIds()
+
+      // Select the newly created conversation
+      onSelectConversation(newConversationId)
+    } catch (e) {
+      setError('Failed to create a new conversation, please try again.')
+      console.error(e)
+    } finally {
+      setCreatingConversation(false)
+    }
+  }
+
   return (
     <div className="mb-6 rounded-lg bg-white p-4 shadow">
       {/**
@@ -58,12 +79,21 @@ function ConversationSelector({
        * Too many more below to research. Thank you AI.
        */}
       <div className="mx-auto max-w-2xl">
-        <label
-          htmlFor="conversation-select"
-          className="mb-2 block text-sm font-medium text-gray-700"
-        >
-          Select a conversation:
-        </label>
+        <div className="mb-2 flex items-center justify-between">
+          <label
+            htmlFor="conversation-select"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Select a conversation:
+          </label>
+          <button
+            onClick={handleCreateConversation}
+            disabled={creatingConversation || loading}
+            className="rounded-md bg-green-500 px-3 py-1 text-sm text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-green-300"
+          >
+            {creatingConversation ? 'Creating...' : 'New Conversation'}
+          </button>
+        </div>
         <div className="relative">
           <select
             id="conversation-select"
@@ -74,7 +104,7 @@ function ConversationSelector({
                 : selectedConversationId.toString()
             }
             onChange={handleSelectChange}
-            disabled={loading}
+            disabled={loading || creatingConversation}
           >
             <option value="">-- Select a conversation --</option>
             {conversationIds.map((id) => (

@@ -1,7 +1,7 @@
 ---
-description: When to write Vitest tests for React/TypeScript files
+description: ALWAYS write Vitest tests for code changes
 globs: *.tsx,*.ts
-alwaysApply: false
+alwaysApply: true
 ---
 # Frontend Tests
 
@@ -20,4 +20,11 @@ A bug is NOT fixed until a test proves that it's fixed, that would have failed w
 - Utilities: Test pure functions and their edge cases
 - Hooks: Test custom hooks with `@testing-library/react-hooks`
 
-Tests should be COMPREHENSIVE and cover edge cases, not just the happy path.
+## Test case design
+- Tests should be COMPREHENSIVE and cover edge cases, not just the happy path.
+- When there are a variable number of inputs or outputs (such as a list that may contain multiple messages, multiple
+  users, a map with many key/value pairs, or etcetera), ALWAYS test the cases of zero, one, and many items. Test
+  when the input or result is empty that the expected behavior occurs (even if a validation error is the expected
+  result), and the same when there is only one item, or many items.
+- Think out loud about the possible edge cases, as they relate to null/empty conditions, the boundaries of loops, and
+  the cyclomatic structure of the code being tested. Then write tests for any edge cases you can observe.

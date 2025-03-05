@@ -24,6 +24,7 @@ function CodeEditor({ initialCode = '', onChange }: CodeEditorProps) {
         <div className="text-sm font-medium text-gray-700">Python Editor</div>
       </div>
       <div className="size-full overflow-auto">
+        {/* TOODO: use light theme */}
         <CodeMirror
           value={code}
           height="100%"

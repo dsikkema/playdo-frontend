@@ -1,7 +1,7 @@
 ---
-description: When writing TypeScript/React code, ALWAYS use proper type annotations
+description: ALWAYS use proper TypeScrypt annotations
 globs: *.tsx,*.ts
-alwaysApply: false
+alwaysApply: true
 ---
 
 # ALWAYS use proper TypeScript typing

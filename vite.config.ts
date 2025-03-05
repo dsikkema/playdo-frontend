@@ -13,6 +13,11 @@ export default defineConfig({
     include: ['**/test.{ts,tsx}', '**/*.test.{ts,tsx}']
   },
   server: {
-    allowedHosts: ["playdo.sikkema.duckdns.org", "localhost", "127.0.0.1", "0.0.0.0"]
+    allowedHosts: [
+      'playdo.sikkema.duckdns.org',
+      'localhost',
+      '127.0.0.1',
+      '0.0.0.0'
+    ]
   }
 })
