@@ -107,16 +107,35 @@ describe('<ConversationView />', () => {
   })
 
   // Test case for empty conversation
-  it('shows "no messages" when conversation has no messages', async () => {
+  it('shows "no messages" when conversation has no messages and allows adding a new message', async () => {
     // Arrange
+    const user = userEvent.setup()
     const emptyConversation: Conversation = {
       id: 1,
       created_at: '2023-01-01T00:00:00Z',
       updated_at: '2023-01-01T00:00:00Z',
       messages: []
     }
+
+    const user_msg = 'First message in conversation'
+    const assistant_msg = 'Response to first message'
+    const updatedConversation: Conversation = {
+      ...emptyConversation,
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: user_msg }]
+        },
+        {
+          role: 'assistant',
+          content: [{ type: 'text', text: assistant_msg }]
+        }
+      ]
+    }
+
     // Note: different from mockReturnValue - it cuts through the async/Promise layer, mocking what the promise returns
     mockFetchConversation.mockResolvedValue(emptyConversation)
+    mockSendMessage.mockResolvedValue(updatedConversation)
     const conversationId = 1
 
     // Act
@@ -124,15 +143,46 @@ describe('<ConversationView />', () => {
       render(<ConversationView conversationId={conversationId} />)
     })
 
-    // Assert
+    // Assert - Step 1: Verify empty conversation state
     await waitFor(() => {
+      // 1. Assert the proper 'no messages' content is displayed
       expect(
         screen.getByText(
           'No messages found. Start the conversation by sending a message below.'
         )
       ).toBeInTheDocument()
+
+      // 2. Assert that the input element is present
+      expect(
+        screen.getByPlaceholderText('Type your message...')
+      ).toBeInTheDocument()
+      expect(screen.getByText('Send')).toBeInTheDocument()
     })
     expect(mockFetchConversation).toHaveBeenCalledWith(conversationId)
+
+    // Act - Step 2: Add a new message
+    const messageInput = screen.getByPlaceholderText('Type your message...')
+    await act(async () => {
+      await user.type(messageInput, user_msg)
+    })
+
+    const sendButton = screen.getByText('Send')
+    await act(async () => {
+      await user.click(sendButton)
+    })
+
+    // Assert - Step 3: Verify the new message is shown
+    await waitFor(() => {
+      // Check that both the user message and assistant response are displayed
+      expect(screen.getByText(user_msg)).toBeInTheDocument()
+      expect(screen.getByText(assistant_msg)).toBeInTheDocument()
+      expect(screen.getAllByText('You').length).toBe(1)
+      expect(screen.getByText('Assistant')).toBeInTheDocument()
+      expect(screen.getAllByText('Assistant').length).toBe(1)
+    })
+
+    // Verify the API was called correctly
+    expect(mockSendMessage).toHaveBeenCalledWith(conversationId, user_msg)
   })
 
   // Test case for conversation with a single message

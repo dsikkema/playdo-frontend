@@ -10,8 +10,9 @@
     "serve": "vite preview",
     "test": "vitest run",
     "test:ui": "vitest --ui",
-    "lint": "eslint src --max-warnings=0",
-    "typecheck": "tsc --project tsconfig.json --noEmit"
+    "lint": "eslint src --max-warnings=0 --fix",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "prettier": "prettier --write ."
   },
   "dependencies": {
     "@codemirror/lang-python": "^6.1.7",

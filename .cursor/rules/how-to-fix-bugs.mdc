@@ -13,3 +13,5 @@ alwaysApply: true
 
   As an important reminder: WRITE TESTS to surface the bug BEFORE writing a fix. If this test is skipped, there's a possibility
   that the test you write afterwards could be unwittingly tailored to the fix-implementation and not actually fix the bug.
+
+  NOTE: it is MANDATORY to write unit tests BEFORE fixing the bug. Run them, expect them to fail, then fix the application code.
