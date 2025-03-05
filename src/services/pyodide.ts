@@ -28,15 +28,11 @@ class PyodideService {
   private pyodidePromise: Promise<PyodideInterface> | null = null
   private pyodide: PyodideInterface | null = null
   private status: PyodideStatus = PyodideStatus.UNINITIALIZED
-  private originalConsoleLog: (...data: unknown[]) => void
-  private originalConsoleError: (...data: unknown[]) => void
   private stdoutBuffer: string[] = []
   private stderrBuffer: string[] = []
 
   private constructor() {
-    // Save original console methods
-    this.originalConsoleLog = console.log
-    this.originalConsoleError = console.error
+    // Nothing to initialize now that we're using pyodide.setStdout/setStderr
   }
 
   /**
@@ -137,56 +133,27 @@ class PyodideService {
   }
 
   /**
-   * Redirect stdout and stderr to buffers
+   * Redirect stdout and stderr to capture output
    */
   private redirectOutput(): void {
-    // Save original methods
-    const originalConsoleLog: (...data: unknown[]) => void = console.log
-    const originalConsoleError: (...data: unknown[]) => void = console.error
-    const stdoutBuffer: string[] = this.stdoutBuffer
-    const stderrBuffer: string[] = this.stderrBuffer
+    // Clear output buffers
+    this.stdoutBuffer = []
+    this.stderrBuffer = []
 
-    // Override console.log to capture stdout
-    console.log = function (...args: unknown[]): void {
-      const output: string = args.map((arg) => String(arg)).join(' ')
-      stdoutBuffer.push(output)
-      // Still call original for debugging
-      originalConsoleLog.apply(console, args)
-    }
-
-    // Override console.error to capture stderr
-    console.error = function (...args: unknown[]): void {
-      const output: string = args.map((arg) => String(arg)).join(' ')
-      stderrBuffer.push(output)
-      // Still call original for debugging
-      originalConsoleError.apply(console, args)
-    }
-
-    // Set up Python stdout/stderr redirection
     if (this.pyodide) {
-      this.pyodide.runPython(`
-        import sys
-        from pyodide.ffi import to_js
+      // Set stdout handler
+      this.pyodide.setStdout({
+        batched: (output: string) => {
+          this.stdoutBuffer.push(output)
+        }
+      })
 
-        class PyodideOutput:
-            def __init__(self, console_method):
-                self.console_method = console_method
-                self.buffer = ''
-
-            def write(self, text):
-                self.buffer += text
-                if '\\n' in text:
-                    self.flush()
-                return len(text)
-
-            def flush(self):
-                if self.buffer:
-                    self.console_method(self.buffer.rstrip())
-                    self.buffer = ''
-
-        sys.stdout = PyodideOutput(to_js(console.log))
-        sys.stderr = PyodideOutput(to_js(console.error))
-      `)
+      // Set stderr handler
+      this.pyodide.setStderr({
+        batched: (output: string) => {
+          this.stderrBuffer.push(output)
+        }
+      })
     }
   }
 
@@ -194,21 +161,10 @@ class PyodideService {
    * Restore original stdout and stderr
    */
   private restoreOutput(): void {
-    // Restore console methods
-    console.log = this.originalConsoleLog
-    console.error = this.originalConsoleError
-
-    // Restore Python stdout/stderr
+    // Restore Python stdout/stderr by passing no handler (reverts to default)
     if (this.pyodide) {
-      try {
-        this.pyodide.runPython(`
-          import sys
-          sys.stdout = sys.__stdout__
-          sys.stderr = sys.__stderr__
-        `)
-      } catch (e: unknown) {
-        console.error('Error restoring Python stdout/stderr:', e)
-      }
+      this.pyodide.setStdout({})
+      this.pyodide.setStderr({})
     }
   }
 }
