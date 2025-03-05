@@ -21,14 +21,6 @@ export interface ExecutionResult {
 }
 
 /**
- * Interface for output handlers
- */
-export interface OutputHandlers {
-  onStdout?: (output: string) => void
-  onStderr?: (output: string) => void
-}
-
-/**
  * Creates and manages a Pyodide instance
  */
 export class PyodideRunner {
@@ -45,9 +37,7 @@ export class PyodideRunner {
 
     try {
       this.status = PyodideStatus.LOADING
-      this.pyodide = await loadPyodide({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
-      })
+      this.pyodide = await loadPyodide()
       this.status = PyodideStatus.READY
       return this.pyodide
     } catch (error) {
