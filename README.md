@@ -71,9 +71,15 @@ npm run test
 
 View and interact with tests via UI:
 
+#### Pyodide Integration Tests
+
+Pyodide integration tests require a browser environment:
+
 ```bash
-npm run test:ui
+npm run test:ui -- src/services/pyodide_integration.test.ts
 ```
+
+These tests verify Python code execution through the Pyodide service in a real browser context.
 
 ### Linting and Type Checking
 

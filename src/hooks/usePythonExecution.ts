@@ -19,7 +19,11 @@ export function usePythonExecution() {
     error: null
   })
 
-  // Initialize Pyodide if not already initialized
+  /**
+   * Initialize Pyodide if not already initialized
+   * TOODO: understand better useCallback and its memoization of returned function references, as its used by
+   * the initialize and executeCode callbacks
+   */
   const initialize = useCallback(async () => {
     if (
       state.status === PyodideStatus.UNINITIALIZED ||
