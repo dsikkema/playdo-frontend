@@ -81,6 +81,17 @@ Check for TypeScript errors:
 npm run typecheck
 ```
 
+Build the application:
+```bash
+npm run build
+```
+
+After building, can run with (for example):
+
+```bash
+python -m http.server 8000 --directory dist
+```
+
 ## Project Structure
 
 ```
