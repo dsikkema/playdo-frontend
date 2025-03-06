@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import Message from './Message'
 import { Message as MessageType } from '../types'
 import { vi } from 'vitest'
@@ -126,7 +126,6 @@ describe('<Message />', () => {
       expect(messageContainer).toHaveTextContent('return "Code block"')
 
       // Check the newlines are present (in html form) by seeing 'This is after an empty line'
-      // is in a <p> element all by itself, with NO OTHER TEXT
       const afterEmptyLine = screen.getByText('This is after an empty line.')
       expect(afterEmptyLine).toBeInTheDocument()
       expect(afterEmptyLine.tagName).toBe('P')
@@ -187,7 +186,8 @@ describe('<Message />', () => {
      * and make the test verify _for sure_ that it removed the script. But it doesn't run while in
      * this testing mode (unsure why, possibly related to the type of DOM used by Vitest. DOMPurify
      * relies heavily on in-browser DOM APIs for performance reasons, so it's not surprising that
-     * it breaks in highly envrionment-dependent ways)
+     * it breaks in highly envrionment-dependent ways). Hence, DOMPurify is mocked, and we just
+     * verify that it gets called, only manual testing shows that it 'does its job'
      */
     // Arrange
     const message = 'Hello world `<script>bad stuff</script>` this is bad!'
