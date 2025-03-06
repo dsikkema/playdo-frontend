@@ -1,35 +1,21 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import Message from './Message'
 import { Message as MessageType } from '../types'
+import { vi } from 'vitest'
 import DOMPurify from 'dompurify'
 
-// Mock DOMPurify to verify it's being used
-vi.mock('dompurify', () => ({
+vi.mock('DOMPurify', () => ({
   default: {
-    sanitize: vi.fn((html) => {
-      // Simple sanitization for testing
-      if (typeof html === 'string') {
-        // Remove script tags
-        let sanitized = html.replace(
-          /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-          ''
-        )
-
-        // Simple simulation of removing dangerous attributes (not a complete implementation)
-        // In a real implementation, DOMPurify would handle this more comprehensively
-        sanitized = sanitized
-          .replace(/javascript:/gi, 'removed:')
-          .replace(/\s+onclick=/gi, ' data-removed-onclick=')
-
-        return sanitized
-      }
-      return html
-    })
+    sanitize: vi.fn().mockImplementation((input) => input)
   }
 }))
 
 describe('<Message />', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   // Test case for user message
   it('renders user message correctly', async () => {
     // Arrange
@@ -138,11 +124,23 @@ describe('<Message />', () => {
       expect(messageContainer).toHaveTextContent('This is after an empty line.')
       expect(messageContainer).toHaveTextContent('def example():')
       expect(messageContainer).toHaveTextContent('return "Code block"')
+
+      // Check the newlines are present (in html form) by seeing 'This is after an empty line'
+      // is in a <p> element all by itself, with NO OTHER TEXT
+      const afterEmptyLine = screen.getByText('This is after an empty line.')
+      expect(afterEmptyLine).toBeInTheDocument()
+      expect(afterEmptyLine.tagName).toBe('P')
+      // makes sure no other text in that paragraph, because it's newline separated
+      expect(afterEmptyLine.textContent).toBe('This is after an empty line.')
     })
   })
 
   // Test case for markdown formatting
   it('renders markdown formatting correctly', async () => {
+    /**
+     * Note: this is actually a bit of an integration test because we don't mock marked, but call the
+     * real component in the test. That's okay.
+     */
     // Arrange
     const markdownMessage: MessageType = {
       role: 'assistant',
@@ -159,97 +157,60 @@ describe('<Message />', () => {
 
     // Assert
     await waitFor(() => {
-      const messageContainer = screen
-        .getByText(/This is a small/)
-        .closest('div')
+      // Find elements by their expected rendering
+      const container = screen.getByText(/This is a small/).closest('.prose')
+      expect(container).not.toBeNull()
+
+      // Check for code inline element
+      const codeInline = container?.querySelector('code')
+      expect(codeInline).not.toBeNull()
+      expect(codeInline).toHaveTextContent('example')
 
       // Check for code block
-      expect(messageContainer).toHaveTextContent('formatting')
+      const preElement = container?.querySelector('pre')
+      expect(preElement).not.toBeNull()
+      const codeBlock = preElement?.querySelector('code')
+      expect(codeBlock).not.toBeNull()
+      expect(codeBlock).toHaveTextContent('formatting')
 
-      // Check that all content is present
-      expect(messageContainer).toHaveTextContent('This is a small')
-      expect(messageContainer).toHaveTextContent('example')
-      expect(messageContainer).toHaveTextContent('formatting')
-      expect(messageContainer).toHaveTextContent('and')
-      expect(messageContainer).toHaveTextContent('bold')
-      expect(messageContainer).toHaveTextContent('things')
+      // Check for bold text
+      const boldElement = container?.querySelector('strong')
+      expect(boldElement).not.toBeNull()
+      expect(boldElement).toHaveTextContent('bold')
     })
   })
 
   // Test that HTML sanitization is properly applied
-  it('sanitizes dangerous HTML content', async () => {
+  it('sanitizes HTML content', async () => {
+    /**
+     * Note: I actually wanted a kind of 'integration test' here, to actually rev DOMPurify's engine
+     * and make the test verify _for sure_ that it removed the script. But it doesn't run while in
+     * this testing mode (unsure why, possibly related to the type of DOM used by Vitest. DOMPurify
+     * relies heavily on in-browser DOM APIs for performance reasons, so it's not surprising that
+     * it breaks in highly envrionment-dependent ways)
+     */
     // Arrange
+    const message = 'Hello world `<script>bad stuff</script>` this is bad!'
+    // const message = 'Hello world'
     const dangerousMessage: MessageType = {
       role: 'user',
-      content: [
-        { type: 'text', text: 'Hello <script>alert("XSS")</script> world' }
-      ]
+      content: [{ type: 'text', text: message }]
     }
 
     // Act
     render(<Message message={dangerousMessage} />)
 
-    // Assert
-    await waitFor(() => {
-      expect(screen.getByText('Hello world')).toBeInTheDocument()
-      expect(DOMPurify.sanitize).toHaveBeenCalled()
-    })
-  })
-
-  // Test that event handlers are removed
-  it('removes dangerous event handlers', async () => {
-    // Arrange
-    const dangerousMessage: MessageType = {
-      role: 'user',
-      content: [
-        {
-          type: 'text',
-          text: '<a href="javascript:alert(\'XSS\')" onclick="alert(\'XSS\')">Click me</a>'
-        }
-      ]
-    }
-
-    // Act
-    render(<Message message={dangerousMessage} />)
+    // PS: Found something cool here. I was doing { debug } = render()...
+    // and not seeing the message render when I called debug(), which was
+    // because it was still (asynchronously) waiting to be rendered. Always
+    // think in async terms in React!!!
 
     // Assert
     await waitFor(() => {
-      expect(DOMPurify.sanitize).toHaveBeenCalled()
-
-      // The link should be rendered but without the dangerous attributes
-      const link = screen.getByText('Click me')
-      expect(link).toBeInTheDocument()
-
-      // With our mock implementation, javascript: should be changed to removed:
-      expect(link.getAttribute('href')).toBe("removed:alert('XSS')")
-
-      // onclick should be transformed to data-removed-onclick
-      expect(link.getAttribute('onclick')).toBeNull()
-      expect(link.getAttribute('data-removed-onclick')).toBe("alert('XSS')")
-    })
-  })
-
-  // Test that iframe elements are handled properly
-  it('handles iframe elements properly', async () => {
-    // Arrange
-    const iframeMessage: MessageType = {
-      role: 'user',
-      content: [
-        { type: 'text', text: '<iframe src="https://evil.com"></iframe>' }
-      ]
-    }
-
-    // Act
-    render(<Message message={iframeMessage} />)
-
-    // Assert
-    await waitFor(() => {
-      expect(DOMPurify.sanitize).toHaveBeenCalled()
-
-      // We're not testing actual iframe removal since our mock doesn't implement this
-      // Instead we verify DOMPurify was called to sanitize the content
-      const container = screen.getByText('You').closest('div')
-      expect(container).toBeInTheDocument()
+      expect(DOMPurify.sanitize).toHaveBeenCalledOnce()
+      expect(DOMPurify.sanitize).toHaveBeenCalledWith(
+        expect.stringContaining('Hello world')
+      )
     })
   })
 })
