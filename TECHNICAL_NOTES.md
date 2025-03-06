@@ -52,6 +52,7 @@ src
 ## Data Flow
 
 1. **Code Execution Flow**:
+
    - User writes Python code in the CodeEditor
    - User clicks the run button, triggering `handleRunCode()` in App.tsx
    - App.tsx calls `executeCode()` from the usePythonExecution hook
@@ -69,6 +70,7 @@ src
 ### Pyodide Integration
 
 - **pyodide.ts**: Core service that interfaces directly with the Pyodide WebAssembly runtime
+
   - Handles initialization of the Python environment
   - Provides methods to execute Python code and capture output
   - Manages Pyodide's lifecycle states (uninitialized, loading, ready, error)
@@ -81,15 +83,18 @@ src
 ### Component Props and State
 
 - **App.tsx**: Maintains state for:
+
   - Selected conversation ID
   - Current code in editor
   - Coordinates the Python execution process
 
 - **CodeEditor.tsx**: Accepts props for:
+
   - Initial code content
   - onChange callback for when code changes
 
 - **OutputDisplay.tsx**: Accepts props for:
+
   - Standard output (stdout)
   - Error output (stderr)
   - Runtime errors
@@ -101,6 +106,7 @@ src
 ## API Integration
 
 The frontend communicates with the Flask backend API for:
+
 - Retrieving and sending conversation messages
 - Storing code snippets and execution results
 - Tracking learning progress
