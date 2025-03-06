@@ -1,0 +1,133 @@
+---
+description: Clean Testing Principles
+globs:
+alwaysApply: true
+---
+ # Clean Testing Principles
+
+Rules for maintaining clean application code and manageable tests.
+
+<rule>
+name: clean_testing_principles
+description: Prevents adding test-only parameters to application code and creating overly complicated tests
+filters:
+  # Apply to TypeScript/JavaScript files
+  - type: file_extension
+    pattern: "\\.(ts|tsx|js|jsx)$"
+  # Focus on test files
+  - type: file_name
+    pattern: "\\.(test|spec)\\.(ts|tsx|js|jsx)$"
+  # Apply to code generation events
+  - type: event
+    pattern: "code_generation|edit_suggestion"
+
+actions:
+  - type: reject
+    conditions:
+      # Reject adding optional parameters just for testing
+      - pattern: "\\binterface\\b.*\\?:.*\\btest(Only|Helper)\\b"
+        message: "Adding test-only parameters to interfaces is not allowed"
+      - pattern: "\\bfunction\\b.*\\(.*\\btest(Only|Helper)\\b.*\\?.*\\)"
+        message: "Adding optional test-only parameters to functions is not allowed"
+      # Reject reflection-based access of private fields in tests
+      - pattern: "Object\\.getOwnPropertyDescriptor|Reflect\\.get|\\['_.*'\\]|\\[\\'_.*\\'\\]"
+        message: "Accessing private fields through reflection or other hacky methods is not allowed in tests"
+
+  - type: suggest
+    message: |
+      When writing tests, follow these principles:
+
+      1. **Keep Application Code Clean**:
+         - Never add parameters, properties, or methods to application code solely to make testing easier
+         - Application code should only contain what's needed for production
+
+      2. **Testing Private Functionality**:
+         - If you need to test private functionality, consider if your design needs improvement
+         - Extract the private functionality into a separate, testable module if appropriate
+         - Use dependency injection rather than reflection to access internals
+
+      3. **Test Structure**:
+         - Test public interfaces and outcomes, not implementation details
+         - Mock external dependencies, not the component under test
+         - Use proper testing patterns like Arrange-Act-Assert
+         - Keep test setup minimal and focused on the specific test case
+
+      4. **Preferred Testing Approaches**:
+         - Use constructor/method parameter injection for dependencies
+         - Create test-specific subclasses only in test files, not in application code
+         - Use test doubles (mocks, stubs) for external dependencies
+         - Prefer higher-level integration tests for complex interactions
+
+      5. **Avoid at All Costs**:
+         - Adding optional parameters that are only used in tests
+         - Using reflection or direct access to private fields/methods
+         - Modifying application code solely to make it testable in a specific way
+         - Complex test utilities that make tests harder to understand
+
+examples:
+  - input: |
+      // Bad: Adding optional parameters just for testing
+      interface UserService {
+        getUser(id: string, testOnly?: boolean): User;
+      }
+
+      // Bad: Using reflection to access private fields
+      test('private counter increments', () => {
+        const instance = new Counter();
+        const privateField = Object.getOwnPropertyDescriptor(
+          Object.getPrototypeOf(instance), '_count'
+        );
+        expect(privateField.get.call(instance)).toBe(0);
+      });
+    output: |
+      // Good: Clean interface without test-only parameters
+      interface UserService {
+        getUser(id: string): User;
+      }
+
+      // Good: Testing public behavior, not implementation details
+      test('counter increments', () => {
+        const counter = new Counter();
+        counter.increment();
+        expect(counter.getValue()).toBe(1);
+      });
+
+  - input: |
+      // Bad: Adding unused optional props for testing
+      interface ComponentProps {
+        userId: string;
+        userName: string;
+        testOnlyMockData?: any;
+      }
+
+      // Bad: Complex test with hacky private access
+      test('internal cache is updated', async () => {
+        const service = new DataService();
+        await service.fetchData();
+        // Accessing private cache property directly
+        expect(service['_cache'].size).toBe(5);
+      });
+    output: |
+      // Good: Clean interface with only required props
+      interface ComponentProps {
+        userId: string;
+        userName: string;
+      }
+
+      // Good: Testing public behavior
+      test('data is cached after fetching', async () => {
+        const service = new DataService();
+        // First call should trigger fetch
+        const result1 = await service.fetchData();
+        // Mock the external API to verify cache is used
+        mockApi.fetchData.mockRejectedValue(new Error('API unavailable'));
+        // Should still work (using cache)
+        const result2 = await service.fetchData();
+        expect(result2).toEqual(result1);
+      });
+
+metadata:
+  priority: high
+  version: 1.0
+  tags: ["testing", "code-quality", "best-practices"]
+</rule>
