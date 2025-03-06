@@ -26,22 +26,38 @@ export interface ExecutionResult {
 export class PyodideRunner {
   private pyodide: PyodideInterface | null = null
   private status: PyodideStatus = PyodideStatus.UNINITIALIZED
+  private initPromise: Promise<PyodideInterface> | null = null
 
   /**
    * Initialize a new Pyodide instance
    */
   public async initialize(): Promise<PyodideInterface> {
+    // If we already have a Pyodide instance, return it
     if (this.pyodide) {
       return this.pyodide
     }
 
+    // If we're already loading, return the existing promise
+    if (this.initPromise) {
+      return this.initPromise
+    }
+
     try {
       this.status = PyodideStatus.LOADING
-      this.pyodide = await loadPyodide()
+      
+      // Create and store the initialization promise
+      this.initPromise = loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full/',
+        fullStdLib: true
+      })
+      
+      // Await the promise and store the result
+      this.pyodide = await this.initPromise
       this.status = PyodideStatus.READY
       return this.pyodide
     } catch (error) {
       this.status = PyodideStatus.ERROR
+      this.initPromise = null
       console.error('Failed to load Pyodide:', error)
       throw error
     }

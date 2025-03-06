@@ -21,7 +21,7 @@ export function usePythonExecution() {
 
   /**
    * Initialize Pyodide if not already initialized
-   * TOODO: understand better useCallback and its memoization of returned function references, as its used by
+   * TOODO: understand better useCallback and its memoization of returned function references, as it's used by
    * the initialize and executeCode callbacks
    */
   const initialize = useCallback(async () => {
