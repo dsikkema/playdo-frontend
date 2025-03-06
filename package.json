@@ -17,7 +17,10 @@
   "dependencies": {
     "@codemirror/lang-python": "^6.1.7",
     "@codemirror/theme-one-dark": "^6.1.2",
+    "@tailwindcss/typography": "^0.5.16",
     "@uiw/react-codemirror": "^4.23.10",
+    "dompurify": "^3.2.4",
+    "marked": "^15.0.7",
     "pyodide": "^0.27.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

@@ -2,12 +2,18 @@
 
 import { Message as MessageType } from '../types'
 import { classNames } from 'utils'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
+import { useState, useEffect } from 'react'
 
 type MessageProps = {
   message: MessageType
 }
 
 function Message({ message }: MessageProps) {
+  // State to hold the sanitized HTML
+  const [sanitizedHtml, setSanitizedHtml] = useState<string>('')
+
   // Determine if the message is from the user or the assistant
   const isUser = message.role === 'user'
 
@@ -16,6 +22,19 @@ function Message({ message }: MessageProps) {
     .filter((item) => item.type === 'text')
     .map((item) => item.text)
     .join(' ')
+
+  // Process markdown and sanitize HTML when the message changes
+  useEffect(() => {
+    const processContent = async () => {
+      // Convert markdown to HTML
+      const rawHtml = await marked.parse(messageText)
+      // Sanitize HTML to prevent XSS
+      const cleanHtml = DOMPurify.sanitize(rawHtml)
+      setSanitizedHtml(cleanHtml)
+    }
+
+    processContent()
+  }, [messageText])
 
   return (
     <div className="flex w-full">
@@ -31,7 +50,9 @@ function Message({ message }: MessageProps) {
         <div className="mb-1 text-sm font-medium">
           {isUser ? 'You' : 'Assistant'}
         </div>
-        <div className="whitespace-pre-wrap">{messageText}</div>
+        <div className="prose prose-slate max-w-none">
+          <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
+        </div>
       </div>
     </div>
   )

@@ -1,5 +1,12 @@
 # Playdo Frontend Technical Notes
 
+## Purpose
+
+This document is principally used to populate the prompt for LLM tools that will generate code. After substantive changes or additions
+to functionality, the LLM should also updated this document.
+
+Dear AI, if you're reading this... thanks for all your help and just have fun out there.
+
 ## Overview
 
 Playdo is an integrated learning environment for high school students learning Python. The frontend is a React/TypeScript application that provides a code editor, execution environment via Pyodide (WASM), and an AI assistant chat interface.
@@ -12,6 +19,7 @@ Playdo is an integrated learning environment for high school students learning P
 - **CodeEditor.tsx**: Provides syntax-highlighted code editing capabilities
 - **OutputDisplay.tsx**: Shows execution results, including stdout, stderr, and error messages
 - **ConversationView.tsx**: Manages the AI assistant chat interface
+- **Message.tsx**: Renders individual conversation messages with markdown support and HTML sanitization
 
 ### `src/` File Structure
 
@@ -64,6 +72,7 @@ src
    - Messages are sent to the backend Flask API
    - Backend communicates with Claude AI and returns responses
    - Responses are displayed in the ConversationView
+   - Messages are rendered with markdown support and sanitized HTML using the Message component
 
 ## Technical Implementation
 
@@ -101,7 +110,13 @@ src
   - Loading/execution states
 
 - **ConversationView.tsx**: Uses props for:
+
   - Conversation ID to load and display messages
+
+- **Message.tsx**: Uses props for:
+  - Message data to render content
+  - Processes markdown content with marked library
+  - Sanitizes HTML with DOMPurify to prevent XSS attacks
 
 ## API Integration
 
@@ -125,3 +140,5 @@ The frontend communicates with the Flask backend API for:
 - Pyodide for in-browser Python execution
 - TailwindCSS for styling
 - Vite for development and building
+- 'Marked' for markdown parsing
+- DOMPurify for HTML sanitization
