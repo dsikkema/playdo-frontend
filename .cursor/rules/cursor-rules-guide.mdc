@@ -1,0 +1,309 @@
+---
+description: Writing New Cursor Rules: HOW-TO GUIDE
+globs: *.mdc
+alwaysApply: false
+---
+# Cursor Rules Structure Guide
+
+This document provides a comprehensive guide on how to create well-structured Cursor rules. THIS IS VERY META. THIS IS THE RULE EXPLAINING HOW TO WRITE THE RULES.
+
+## Name and location of the rule file
+
+Name the rule appropriately based on what it does, with applicable globs, and place the .mdc file in the `/rule_drafts` folder.
+
+## File Structure
+
+Every Cursor rule file (`.mdc`) should follow the structure inside the following `<metaExampleOfRuleStructure>` tag:
+
+<metaExampleOfRuleStructure>
+```
+    ---
+    description: Brief Description
+    globs: *.extension
+    alwaysApply: false
+    ---
+    # Rule Title
+
+    Brief explanatory text about what this rule governs.
+
+    <rule>
+    name: rule_name_in_snake_case
+    description: Brief, clear description of what the rule does
+    filters:
+    # Applicability criteria
+    - type: file_extension
+        pattern: "pattern"
+    - type: file_name
+        pattern: "pattern"
+    - type: event
+        pattern: "event_type"
+    - type: content
+        pattern: "pattern"
+
+    actions:
+    - type: reject
+        conditions:
+        - pattern: "pattern"
+            message: "Message explaining rejection"
+
+    - type: suggest
+        message: |
+        Guidelines formatted in Markdown
+
+        1. **Category**:
+            - Point 1
+            - Point 2
+
+    examples:
+    - input: |
+        // Bad example
+        output: |
+        // Good example
+
+    - input: |
+        // Another bad example
+        output: |
+        // Another good example
+
+    metadata:
+    priority: high
+    version: 1.0
+    tags: ["tag1", "tag2"]
+    </rule>
+```
+</metaExampleOfRuleStructure>
+
+## Components Explained
+
+### 1. File Header
+```
+---
+description: Brief Description
+globs: *.extension
+alwaysApply: false
+---
+```
+- **description**: Short description used in listings
+- **globs**: What file patterns this applies to
+- **alwaysApply**: Whether to apply automatically
+
+### 2. Markdown Title
+```
+# Rule Title
+
+Brief explanatory text about what this rule governs.
+```
+- Clear title and descriptive text to explain the rule's purpose
+
+### 3. Rule XML Container
+The entire YAML configuration must be wrapped in `<rule>` and `</rule>` XML tags
+
+### 4. Rule Configuration (YAML)
+
+#### Basic Information
+```yaml
+name: rule_name_in_snake_case
+description: Brief, clear description of what the rule does
+```
+- **name**: Snake_case identifier for the rule (no spaces)
+- **description**: Concise explanation of the rule's purpose
+
+#### Filters (When the rule applies)
+```yaml
+filters:
+  - type: file_extension  # Filter by file type
+    pattern: "\\.(ts|tsx|js|jsx)$"  # Use regex patterns
+  - type: file_name       # Filter by file name
+    pattern: "some_pattern"
+  - type: event           # Filter by event type
+    pattern: "code_generation|edit_suggestion"
+  - type: content         # Filter by file content
+    pattern: "some_pattern"
+```
+- **file_extension**: Which file types this applies to
+- **file_name**: Specific filename patterns
+- **event**: When the rule triggers (code_generation, edit_suggestion, file_create, etc.)
+- **content**: Patterns within file content
+
+#### Actions (What the rule does)
+```yaml
+actions:
+  - type: reject          # Block certain patterns
+    conditions:
+      - pattern: "\\bsome_bad_pattern\\b"
+        message: "Clear explanation of why this is rejected"
+
+  - type: suggest         # Provide guidance
+    message: |
+      When doing X, follow these principles:
+
+      1. **Guideline Category**:
+         - Specific guidance point
+         - Another specific point
+
+      2. **Another Category**:
+         - More guidance...
+```
+- **reject**: Block certain patterns with detailed explanations
+- **suggest**: Provide structured guidance and recommendations
+
+#### Examples (Bad vs. Good patterns)
+```yaml
+examples:
+  - input: |
+      // Bad: Example of problematic code
+      function badExample() {
+        // Details of what makes this bad
+      }
+    output: |
+      // Good: Example of better code
+      function goodExample() {
+        // Details of what makes this good
+      }
+```
+- **input**: The problematic pattern (what not to do)
+- **output**: The recommended alternative (what to do instead)
+
+#### Metadata (Additional information)
+```yaml
+metadata:
+  priority: high
+  version: 1.0
+  tags: ["tag1", "tag2", "tag3"]
+```
+- **priority**: How important this rule is (high/medium/low)
+- **version**: Rule version number
+- **tags**: Categories for organization
+
+## Complete Example of a Well-Structured Rule
+
+```
+---
+description: Standards for React Component Structure
+globs: *.tsx
+alwaysApply: false
+---
+# React Component Structure
+
+Standards for organizing and writing React components.
+
+<rule>
+name: react_component_structure
+description: Enforces best practices for React component organization and structure
+filters:
+  - type: file_extension
+    pattern: "\\.tsx$"
+  - type: content
+    pattern: "React|ReactDOM|import.*React|export.*function.*\\(|export.*const.*=.*\\("
+  - type: event
+    pattern: "code_generation|edit_suggestion"
+
+actions:
+  - type: reject
+    conditions:
+      - pattern: "function\\s+[a-z]\\w*\\s*\\("
+        message: "Component names must be PascalCase (start with uppercase)"
+      - pattern: "useState\\([^)]*((?!as\\s+).)*\\)"
+        message: "useState hooks should include explicit typing"
+
+  - type: suggest
+    message: |
+      When creating React components, follow these guidelines:
+
+      1. **Component Organization**:
+         - Define interfaces/types at the top
+         - Place hooks immediately after the component declaration
+         - Group related state variables
+         - Extract complex logic into custom hooks
+
+      2. **Naming Conventions**:
+         - Use PascalCase for component names
+         - Use camelCase for variables and functions
+         - Use ALL_CAPS for constants
+
+      3. **Performance Considerations**:
+         - Memoize expensive calculations with useMemo
+         - Memoize callback functions with useCallback
+         - Use React.memo for pure components
+
+examples:
+  - input: |
+      // Bad: Poor component structure
+      function myComponent() {
+        function helperFunction() {
+          // Implementation
+        }
+
+        const [data, setData] = useState();
+
+        // More code...
+
+        return (
+          <div>
+            {/* Component JSX */}
+          </div>
+        );
+      }
+    output: |
+      // Good: Well-structured component
+      interface MyComponentProps {
+        // Props definition
+      }
+
+      function MyComponent({ prop1, prop2 }: MyComponentProps) {
+        // State hooks grouped by related functionality
+        const [data, setData] = useState<DataType | null>(null);
+        const [isLoading, setIsLoading] = useState<boolean>(false);
+
+        // Effect hooks
+        useEffect(() => {
+          // Implementation
+        }, [dependency]);
+
+        // Helper functions
+        const helperFunction = useCallback(() => {
+          // Implementation
+        }, [dependency]);
+
+        // Return JSX
+        return (
+          <div>
+            {/* Component JSX */}
+          </div>
+        );
+      }
+
+metadata:
+  priority: high
+  version: 1.0
+  tags: ["react", "components", "structure"]
+</rule>
+```
+
+## Common Pitfalls to Avoid
+
+1. **Missing XML Tags**: Always wrap your YAML configuration in `<rule>` and `</rule>` tags.
+
+2. **Invalid YAML**: Ensure proper indentation and formatting in the YAML section.
+
+3. **Ineffective Patterns**: Make your regex patterns specific enough to catch relevant code but not overly broad.
+
+4. **Vague Guidance**: In the `suggest` section, provide specific, actionable advice rather than generic statements.
+
+5. **Missing Examples**: Always include clear before/after examples that demonstrate the rule in action.
+
+6. **Missing Filters**: Be explicit about when your rule should apply to avoid unexpected triggering.
+
+## Tips for Writing Effective Rules
+
+1. **Be Specific**: Clearly define what the rule applies to and what behavior it expects.
+
+2. **Provide Context**: Explain not just what to do, but why it matters.
+
+3. **Use Structured Guidance**: Organize suggestions into numbered sections with bullet points.
+
+4. **Include Multiple Examples**: Cover different aspects of the rule with various examples.
+
+5. **Test Your Patterns**: Verify that your regex patterns match what you intend and don't have false positives.
+
+6. **Iterate**: Refine your rules based on how they perform in practice.

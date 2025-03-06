@@ -1,0 +1,1 @@
+This directory is a staging ground for Cursor to write new rules files to so I can then copy them into the `.cursor/rules` directory. Gets around IDE issues where Cursor cannot write files inside `.cursor/rules`.
