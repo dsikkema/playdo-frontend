@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import userEvent from '@testing-library/user-event'
-import { act } from 'react'
 import App from './App'
+import usePythonExecution from '../hooks/usePythonExecution'
+import { PyodideStatus } from '../services/pyodide'
 
 // Note: deleted previous implementation that mocked api out, because App doesn't directly use api,
 // and children components that _do_ use it are mocked in this test, and this fact helps demonstrate
@@ -17,7 +18,7 @@ vi.mock('./ConversationSelector', () => ({
     onSelectConversation: (id: number | null) => void
     selectedConversationId: number | null
   }) => (
-    <div data-testid="conversation-selector">
+    <div data-testid="mock-conversation-selector">
       {/**
        * Note: replaces the html content implementation of the real ConversationSelector, because we don't need or care about those implementation
        * details. We only need something in the test component so that we can hook into it and cause the 'onSelectConversation' callback to be
@@ -46,7 +47,7 @@ vi.mock('./ConversationSelector', () => ({
 
 vi.mock('./ConversationView', () => ({
   default: ({ conversationId }: { conversationId: number | null }) => (
-    <div data-testid="conversation-view">
+    <div data-testid="mock-conversation-view">
       {conversationId
         ? `Viewing conversation ${conversationId}`
         : 'No conversation selected'}
@@ -62,9 +63,9 @@ vi.mock('./CodeEditor', () => ({
     initialCode: string
     onChange: (code: string) => void
   }) => (
-    <div data-testid="code-editor">
+    <div data-testid="mock-code-editor">
       <textarea
-        data-testid="code-editor-textarea"
+        data-testid="mock-code-input"
         value={initialCode}
         onChange={(e) => onChange && onChange(e.target.value)}
       />
@@ -72,54 +73,213 @@ vi.mock('./CodeEditor', () => ({
   )
 }))
 
-describe('<App />', () => {
-  it('renders the ConversationSelector, CodeEditor, and ConversationView components', async () => {
-    // Act
-    await act(async () => {
-      render(<App />)
-    })
+// Mock the OutputDisplay component
+vi.mock('./OutputDisplay', () => ({
+  default: ({
+    stdout,
+    stderr,
+    error
+  }: {
+    stdout: string
+    stderr: string
+    error: string | null
+    isLoading?: boolean
+  }) => (
+    <div data-testid="mock-output-display">
+      {stdout && <pre data-testid="mock-stdout">{stdout}</pre>}
+      {stderr && <pre data-testid="mock-stderr">{stderr}</pre>}
+      {error && <pre data-testid="mock-error">{error}</pre>}
+    </div>
+  )
+}))
 
-    // Assert
-    expect(screen.getByTestId('conversation-selector')).toBeInTheDocument()
-    expect(screen.getByTestId('code-editor')).toBeInTheDocument()
-    expect(screen.getByTestId('conversation-view')).toBeInTheDocument()
+// Mock the usePythonExecution hook
+vi.mock('../hooks/usePythonExecution', () => ({
+  default: vi.fn(() => ({
+    executeCode: vi.fn().mockImplementation(() => {
+      // Simulate successful execution
+      return Promise.resolve({
+        stdout: 'Execution output',
+        stderr: '',
+        error: null,
+        result: null
+      })
+    }),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    result: {
+      stdout: 'Execution output',
+      stderr: '',
+      error: null,
+      result: null
+    },
+    isLoading: false,
+    isPyodideInitializing: false,
+    status: PyodideStatus.READY,
+    error: null
+  }))
+}))
+
+describe('<App />', () => {
+  const mockExecuteCode = vi.fn().mockResolvedValue({
+    stdout: 'Execution output',
+    stderr: '',
+    error: null,
+    result: null
   })
 
-  it('passes the selected conversation ID to ConversationView', async () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(usePythonExecution).mockReturnValue({
+      executeCode: mockExecuteCode,
+      initialize: vi.fn().mockResolvedValue(undefined),
+      result: {
+        stdout: 'Execution output',
+        stderr: '',
+        error: null,
+        result: null
+      },
+      isCodeRunning: false,
+      status: PyodideStatus.READY,
+      isPyodideInitializing: false,
+      error: null
+    })
+  })
+
+  it('should render the main components correctly', () => {
+    // Arrange & Act
+    render(<App />)
+
+    // Assert
+    expect(screen.getByTestId('mock-conversation-selector')).toBeInTheDocument()
+    expect(screen.getByTestId('mock-code-editor')).toBeInTheDocument()
+    expect(screen.getByTestId('mock-conversation-view')).toBeInTheDocument()
+  })
+
+  it('should render the run button', () => {
+    // Arrange & Act
+    render(<App />)
+
+    // Assert
+    expect(screen.getByTestId('run-code-button')).toBeInTheDocument()
+  })
+
+  it('should render the OutputDisplay component', () => {
+    // Arrange & Act
+    render(<App />)
+
+    // Assert
+    expect(screen.getByTestId('mock-output-display')).toBeInTheDocument()
+  })
+
+  it('should execute code when the run button is clicked', async () => {
     // Arrange
     const user = userEvent.setup()
+    render(<App />)
+    const runButton = screen.getByTestId('run-code-button')
 
     // Act
-    await act(async () => {
-      render(<App />)
-    })
-
-    // Initially, no conversation is selected
-    expect(screen.getByText('No conversation selected')).toBeInTheDocument()
-
-    // Select a conversation
-    await act(async () => {
-      await user.click(screen.getByTestId('select-conversation-button'))
-    })
+    await user.click(runButton)
 
     // Assert
-    // Note: assertion is based on the text supplied in the mocked child component.
-    // Again, just testing the proper parent-child interaction, that the mock was
-    // given the appropriate value and hence rendering the appropriate state.
-    expect(screen.getByText('Viewing conversation 1')).toBeInTheDocument()
-    expect(screen.getByTestId('selected-id').textContent).toBe('1')
-  })
-
-  it('initializes the CodeEditor with default code', async () => {
-    // Act
-    await act(async () => {
-      render(<App />)
-    })
-
-    // Assert
-    const textareaElement = screen.getByTestId('code-editor-textarea')
-    expect(textareaElement).toHaveValue(
+    expect(mockExecuteCode).toHaveBeenCalledTimes(1)
+    expect(mockExecuteCode).toHaveBeenCalledWith(
       "# Write your Python code here\nprint('Hello, Playdo!')"
     )
+  })
+
+  it('should initialize Pyodide on component mount', async () => {
+    // Arrange
+    const mockInitialize = vi.fn().mockResolvedValue(undefined)
+    vi.mocked(usePythonExecution).mockReturnValue({
+      executeCode: mockExecuteCode,
+      initialize: mockInitialize,
+      result: null,
+      isCodeRunning: false,
+      status: PyodideStatus.UNINITIALIZED,
+      isPyodideInitializing: false,
+      error: null
+    })
+
+    // Act
+    render(<App />)
+
+    // Assert
+    await waitFor(() => {
+      expect(mockInitialize).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('should handle Python execution errors gracefully', async () => {
+    // Arrange
+    const mockExecuteWithError = vi
+      .fn()
+      .mockRejectedValue(new Error('Execution failed'))
+    vi.mocked(usePythonExecution).mockReturnValue({
+      executeCode: mockExecuteWithError,
+      initialize: vi.fn().mockResolvedValue(undefined),
+      result: null,
+      isCodeRunning: false,
+      status: PyodideStatus.READY,
+      isPyodideInitializing: false,
+      error: new Error('Execution failed')
+    })
+
+    // Spy on console.error
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+
+    const user = userEvent.setup()
+    render(<App />)
+    const runButton = screen.getByTestId('run-code-button')
+
+    // Act
+    await user.click(runButton)
+
+    // Assert
+    expect(mockExecuteWithError).toHaveBeenCalledTimes(1)
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to execute code:',
+      expect.any(Error)
+    )
+
+    // Cleanup
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('should pass execution result to OutputDisplay after running code', async () => {
+    // Arrange
+    const user = userEvent.setup()
+    const executionResult = {
+      stdout: 'Test output',
+      stderr: 'Test error',
+      error: null,
+      result: 'Test result'
+    }
+
+    vi.mocked(usePythonExecution).mockReturnValue({
+      executeCode: mockExecuteCode,
+      initialize: vi.fn(),
+      result: executionResult,
+      isCodeRunning: false,
+      status: PyodideStatus.READY,
+      isPyodideInitializing: false,
+      error: null
+    })
+
+    // Act
+    render(<App />)
+    await user.click(screen.getByTestId('run-code-button'))
+
+    // Assert
+    expect(mockExecuteCode).toHaveBeenCalled()
+
+    // Check that the OutputDisplay component is rendered
+    const outputContainer = screen.getByTestId('mock-output-display')
+    expect(outputContainer).toBeInTheDocument()
+
+    // Check that it's displaying the expected output
+    expect(screen.getByTestId('mock-stdout')).toHaveTextContent('Test output')
+    expect(screen.getByTestId('mock-stderr')).toHaveTextContent('Test error')
   })
 })

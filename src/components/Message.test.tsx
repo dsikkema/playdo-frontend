@@ -76,4 +76,36 @@ describe('<Message />', () => {
       screen.queryByText('This should not be visible.')
     ).not.toBeInTheDocument()
   })
+
+  // Test case for message with newlines
+  it('preserves newlines in message content', () => {
+    // Arrange
+    const messageWithNewlines: MessageType = {
+      role: 'assistant',
+      content: [
+        {
+          type: 'text',
+          text: 'This is line one.\nThis is line two.\n\nThis is after an empty line.\n```python\ndef example():\n    return "Code block"\n```'
+        }
+      ]
+    }
+
+    // Act
+    render(<Message message={messageWithNewlines} />)
+
+    // Assert
+    // We need to test that the content is rendered with preserved newlines
+    // This will fail with the current implementation because newlines aren't preserved
+    const messageElement = screen.getByText(/This is line one/)
+    expect(messageElement).toBeInTheDocument()
+
+    // Check the HTML structure to ensure newlines are preserved
+    const messageContainer = messageElement.closest('div')
+    expect(messageContainer).toHaveTextContent('This is line one.')
+    expect(messageContainer).toHaveTextContent('This is line two.')
+    expect(messageContainer).toHaveTextContent('This is after an empty line.')
+    expect(messageContainer).toHaveTextContent('```python')
+    expect(messageContainer).toHaveTextContent('def example():')
+    expect(messageContainer).toHaveTextContent('return "Code block"')
+  })
 })

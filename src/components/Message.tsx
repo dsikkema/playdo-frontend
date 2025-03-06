@@ -31,7 +31,7 @@ function Message({ message }: MessageProps) {
         <div className="mb-1 text-sm font-medium">
           {isUser ? 'You' : 'Assistant'}
         </div>
-        <div>{messageText}</div>
+        <div className="whitespace-pre-wrap">{messageText}</div>
       </div>
     </div>
   )
