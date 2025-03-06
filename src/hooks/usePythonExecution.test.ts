@@ -85,7 +85,7 @@ describe('usePythonExecution', () => {
     // Assert
     expect(pyodideService.executeCode).toHaveBeenCalledWith(code)
     expect(result.current.result).toEqual(mockExecutionResult)
-    expect(result.current.isLoading).toBe(false)
+    expect(result.current.isCodeRunning).toBe(false)
   })
 
   it('should handle Python errors during execution', async () => {
@@ -127,7 +127,7 @@ describe('usePythonExecution', () => {
     })
 
     // Check state updates
-    expect(result.current.isLoading).toBe(false)
+    expect(result.current.isCodeRunning).toBe(false)
     expect(result.current.error).toBe(error)
     expect(result.current.result?.error).toBe('Execution failed')
   })

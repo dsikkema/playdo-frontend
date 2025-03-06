@@ -15,7 +15,9 @@ describe('<OutputDisplay />', () => {
 
   it('should display loading state when isLoading is true', () => {
     // Arrange & Act
-    render(<OutputDisplay stdout="" stderr="" error={null} isLoading={true} />)
+    render(
+      <OutputDisplay stdout="" stderr="" error={null} isCodeRunning={true} />
+    )
 
     // Assert
     expect(screen.getByText('Running...')).toBeInTheDocument()

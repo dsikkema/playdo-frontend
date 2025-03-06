@@ -12,14 +12,14 @@ function pyodidePlugin(): Plugin {
       // Set correct MIME types for Pyodide files
       server.middlewares.use((req, res, next) => {
         if (req.url?.includes('.wasm')) {
-          res.setHeader('Content-Type', 'application/wasm');
+          res.setHeader('Content-Type', 'application/wasm')
         } else if (req.url?.includes('.asm.js')) {
-          res.setHeader('Content-Type', 'application/javascript');
+          res.setHeader('Content-Type', 'application/javascript')
         }
-        next();
-      });
+        next()
+      })
     }
-  };
+  }
 }
 
 // https://vitejs.dev/config https://vitest.dev/config

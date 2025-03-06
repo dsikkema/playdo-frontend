@@ -113,6 +113,7 @@ vi.mock('../hooks/usePythonExecution', () => ({
       result: null
     },
     isLoading: false,
+    isPyodideInitializing: false,
     status: PyodideStatus.READY,
     error: null
   }))
@@ -137,8 +138,9 @@ describe('<App />', () => {
         error: null,
         result: null
       },
-      isLoading: false,
+      isCodeRunning: false,
       status: PyodideStatus.READY,
+      isPyodideInitializing: false,
       error: null
     })
   })
@@ -192,8 +194,9 @@ describe('<App />', () => {
       executeCode: mockExecuteCode,
       initialize: mockInitialize,
       result: null,
-      isLoading: false,
+      isCodeRunning: false,
       status: PyodideStatus.UNINITIALIZED,
+      isPyodideInitializing: false,
       error: null
     })
 
@@ -215,8 +218,9 @@ describe('<App />', () => {
       executeCode: mockExecuteWithError,
       initialize: vi.fn().mockResolvedValue(undefined),
       result: null,
-      isLoading: false,
+      isCodeRunning: false,
       status: PyodideStatus.READY,
+      isPyodideInitializing: false,
       error: new Error('Execution failed')
     })
 
@@ -257,8 +261,9 @@ describe('<App />', () => {
       executeCode: mockExecuteCode,
       initialize: vi.fn(),
       result: executionResult,
-      isLoading: false,
+      isCodeRunning: false,
       status: PyodideStatus.READY,
+      isPyodideInitializing: false,
       error: null
     })
 

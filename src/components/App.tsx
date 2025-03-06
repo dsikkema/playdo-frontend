@@ -17,7 +17,13 @@ function App() {
   // below function does code execution and populates outputs into result. Happens
   // on every component re-render. That way the OutputElement below can display
   // it all.
-  const { executeCode, initialize, result, isLoading } = usePythonExecution()
+  const {
+    executeCode,
+    initialize,
+    result,
+    isCodeRunning,
+    isPyodideInitializing
+  } = usePythonExecution()
 
   // Initialize Pyodide on component mount
   useEffect(() => {
@@ -48,7 +54,7 @@ function App() {
               <CodeEditor initialCode={code} onChange={setCode} />
               <button
                 onClick={handleRunCode}
-                disabled={isLoading}
+                disabled={isCodeRunning || isPyodideInitializing}
                 className="absolute bottom-4 right-4 rounded-full bg-green-500 p-3 text-white shadow-lg transition hover:bg-green-600 disabled:bg-green-300"
                 data-testid="run-code-button"
                 aria-label="Run code"
@@ -69,7 +75,8 @@ function App() {
                 stdout={result?.stdout || ''}
                 stderr={result?.stderr || ''}
                 error={result?.error || null}
-                isLoading={isLoading}
+                isCodeRunning={isCodeRunning}
+                isPyodideInitializing={isPyodideInitializing}
               />
             </div>
           </div>

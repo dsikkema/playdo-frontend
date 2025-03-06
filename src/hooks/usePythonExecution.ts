@@ -6,7 +6,8 @@ import pyodideService, {
 
 interface UsePythonExecutionState {
   result: ExecutionResult | null
-  isLoading: boolean
+  isCodeRunning: boolean
+  isPyodideInitializing: boolean
   status: PyodideStatus
   error: Error | null
 }
@@ -14,7 +15,8 @@ interface UsePythonExecutionState {
 export function usePythonExecution() {
   const [state, setState] = useState<UsePythonExecutionState>({
     result: null,
-    isLoading: false,
+    isCodeRunning: false,
+    isPyodideInitializing: false,
     status: pyodideService.getStatus(),
     error: null
   })
@@ -30,18 +32,18 @@ export function usePythonExecution() {
       state.status === PyodideStatus.ERROR
     ) {
       try {
-        setState((prev) => ({ ...prev, isLoading: true }))
+        setState((prev) => ({ ...prev, isPyodideInitializing: true }))
         await pyodideService.initialize()
         setState((prev) => ({
           ...prev,
-          isLoading: false,
+          isPyodideInitializing: false,
           status: pyodideService.getStatus(),
           error: null
         }))
       } catch (error) {
         setState((prev) => ({
           ...prev,
-          isLoading: false,
+          isPyodideInitializing: false,
           status: PyodideStatus.ERROR,
           error:
             error instanceof Error
@@ -56,8 +58,17 @@ export function usePythonExecution() {
   const executeCode = useCallback(
     async (code: string) => {
       try {
-        // Set loading state
-        setState((prev) => ({ ...prev, isLoading: true }))
+        // Set code running state and clear previous results
+        setState((prev) => ({
+          ...prev,
+          isCodeRunning: true,
+          result: {
+            stdout: '',
+            stderr: '',
+            error: null,
+            result: null
+          }
+        }))
 
         // Initialize if needed
         if (state.status === PyodideStatus.UNINITIALIZED) {
@@ -71,7 +82,7 @@ export function usePythonExecution() {
         setState((prev) => ({
           ...prev,
           result,
-          isLoading: false,
+          isCodeRunning: false,
           error: null
         }))
 
@@ -80,7 +91,7 @@ export function usePythonExecution() {
         // Handle execution errors
         setState((prev) => ({
           ...prev,
-          isLoading: false,
+          isCodeRunning: false,
           error:
             error instanceof Error
               ? error

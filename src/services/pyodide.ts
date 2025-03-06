@@ -44,13 +44,13 @@ export class PyodideRunner {
 
     try {
       this.status = PyodideStatus.LOADING
-      
+
       // Create and store the initialization promise
       this.initPromise = loadPyodide({
         indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.3/full/',
         fullStdLib: true
       })
-      
+
       // Await the promise and store the result
       this.pyodide = await this.initPromise
       this.status = PyodideStatus.READY

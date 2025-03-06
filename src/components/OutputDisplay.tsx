@@ -4,14 +4,16 @@ export interface OutputDisplayProps {
   stdout: string
   stderr: string
   error: string | null
-  isLoading?: boolean
+  isCodeRunning?: boolean
+  isPyodideInitializing?: boolean
 }
 
 function OutputDisplay({
   stdout,
   stderr,
   error,
-  isLoading = false
+  isCodeRunning = false,
+  isPyodideInitializing = false
 }: OutputDisplayProps) {
   const outputRef = useRef<HTMLDivElement>(null)
 
@@ -30,12 +32,12 @@ function OutputDisplay({
       <div className="border-b border-gray-200 px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="text-sm font-medium text-gray-700">Output</div>
-          {isLoading && (
+          {isCodeRunning ? (
             <div className="flex items-center">
               <div className="mr-2 size-2 animate-pulse rounded-full bg-green-500"></div>
               <span className="text-xs text-gray-500">Running...</span>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
       <div
@@ -43,13 +45,19 @@ function OutputDisplay({
         className="size-full overflow-auto p-4 font-mono text-sm"
         data-testid="output-display"
       >
-        {isLoading && !hasOutput && (
+        {isCodeRunning && !hasOutput && (
           <div className="flex h-full items-center justify-center">
             <div className="text-gray-400">Running code...</div>
           </div>
         )}
 
-        {!isLoading && !hasOutput && (
+        {isPyodideInitializing && (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-gray-400">Loading...</div>
+          </div>
+        )}
+
+        {!isCodeRunning && !hasOutput && (
           <div className="flex h-full items-center justify-center">
             <div className="text-gray-400">
               Run your code to see output here
