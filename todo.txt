@@ -1,0 +1,5 @@
+in this PR I want to 
+1. change message size. They're too narrow, not taking advantage of all the space available even inside of the ConversationView component. There's no need for them to be so heavily tilted assistant messages to the left, user to the right. They can be a little bit tilted like that, but only a small amount, I want the width of each message to utilize most of the width of the screen.
+2. The height of the conversation view is arbitrarily limited to be the same as the height of the CodeEditor. It should really take advantage of all the screen length that's visible on "its side" beneath the ConversationSelector.
+3. The top of the page, the header, takes too much space. I need to imagine a better place to put the Playdo branding and the conversation selector.
+
