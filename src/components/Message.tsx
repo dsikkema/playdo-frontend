@@ -2,7 +2,7 @@
 
 import { Message as MessageType } from '../types'
 import { classNames } from 'utils'
-
+import { marked } from 'marked'
 type MessageProps = {
   message: MessageType
 }
@@ -16,6 +16,10 @@ function Message({ message }: MessageProps) {
     .filter((item) => item.type === 'text')
     .map((item) => item.text)
     .join(' ')
+
+  const createMarkup = () => {
+    return { __html: marked(messageText) }
+  }
 
   return (
     <div className="flex w-full">
@@ -31,7 +35,9 @@ function Message({ message }: MessageProps) {
         <div className="mb-1 text-sm font-medium">
           {isUser ? 'You' : 'Assistant'}
         </div>
-        <div className="whitespace-pre-wrap">{messageText}</div>
+        <div className="prose prose-slate max-w-none">
+          <div dangerouslySetInnerHTML={createMarkup()} />
+        </div>
       </div>
     </div>
   )

@@ -104,8 +104,48 @@ describe('<Message />', () => {
     expect(messageContainer).toHaveTextContent('This is line one.')
     expect(messageContainer).toHaveTextContent('This is line two.')
     expect(messageContainer).toHaveTextContent('This is after an empty line.')
-    expect(messageContainer).toHaveTextContent('```python')
     expect(messageContainer).toHaveTextContent('def example():')
     expect(messageContainer).toHaveTextContent('return "Code block"')
+  })
+
+  // Test case for markdown formatting
+  it('renders markdown formatting correctly', () => {
+    // Arrange
+    const markdownMessage: MessageType = {
+      role: 'assistant',
+      content: [
+        {
+          type: 'text',
+          text: 'This is a small `example` message with \n\n```\nformatting\n```\n\nand **bold** things.'
+        }
+      ]
+    }
+
+    // Act
+    render(<Message message={markdownMessage} />)
+
+    // Assert
+    const messageContainer = screen.getByText(/This is a small/).closest('div')
+
+    // Check for inline code formatting
+    const inlineCode = screen.getByText('example')
+    expect(inlineCode.tagName).toBe('CODE')
+
+    // Check for code block
+    const codeBlock = screen.getByText('formatting')
+    expect(codeBlock.tagName).toBe('CODE')
+    expect(codeBlock.parentElement?.tagName).toBe('PRE')
+
+    // Check for bold text
+    const boldText = screen.getByText('bold')
+    expect(boldText.tagName).toBe('STRONG')
+
+    // Check that all content is present
+    expect(messageContainer).toHaveTextContent('This is a small')
+    expect(messageContainer).toHaveTextContent('example')
+    expect(messageContainer).toHaveTextContent('formatting')
+    expect(messageContainer).toHaveTextContent('and')
+    expect(messageContainer).toHaveTextContent('bold')
+    expect(messageContainer).toHaveTextContent('things')
   })
 })
