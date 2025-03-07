@@ -135,7 +135,6 @@ describe('<App />', () => {
       result: {
         stdout: 'Execution output',
         stderr: '',
-        error: null,
         result: null
       },
       isCodeRunning: false,

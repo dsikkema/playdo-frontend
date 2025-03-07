@@ -81,7 +81,6 @@ function App() {
               <OutputDisplay
                 stdout={result?.stdout || ''}
                 stderr={result?.stderr || ''}
-                error={result?.error || null}
                 isCodeRunning={isCodeRunning}
                 isPyodideInitializing={isPyodideInitializing}
               />

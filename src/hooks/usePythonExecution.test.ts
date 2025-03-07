@@ -5,14 +5,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 const mockExecutionResult = {
   stdout: 'Hello, World!',
   stderr: '',
-  error: null,
   result: 'Execution result'
 }
 
 const mockErrorResult = {
   stdout: '',
   stderr: 'Error message',
-  error: 'Python error occurred',
   result: null
 }
 
@@ -129,7 +127,6 @@ describe('usePythonExecution', () => {
     // Check state updates
     expect(result.current.isCodeRunning).toBe(false)
     expect(result.current.error).toBe(error)
-    expect(result.current.result?.error).toBe('Execution failed')
   })
 
   it('should auto-initialize when executing code if not initialized', async () => {

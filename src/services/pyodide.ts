@@ -16,7 +16,6 @@ export enum PyodideStatus {
 export interface ExecutionResult {
   stdout: string
   stderr: string
-  error: string | null
   result: unknown
 }
 
@@ -105,18 +104,24 @@ export class PyodideRunner {
       return {
         stdout,
         stderr,
-        error: null,
         result
       }
     } catch (error) {
       // Collect output even if execution failed
       const stdout: string = stdoutBuffer.join('\n')
       const stderr: string = stderrBuffer.join('\n')
+      const error_str: string =
+        error instanceof Error ? error.message : String(error)
+      // work around what is, in my opinion, a pyodide bug which throws error instead of populating stderr in case of Python error
+      // https://github.com/pyodide/pyodide/issues/3938
+      //
+      // Don't need to worry about semantics of 'null vs empty string' in stderr/stdout here, that's handled in other code on the basis of
+      // other app considerations relating to whether code has been run or changed
+      const combined_stderr = stderr + '\n' + error_str
 
       return {
         stdout,
-        stderr,
-        error: error instanceof Error ? error.message : String(error),
+        stderr: combined_stderr,
         result: null
       }
     }
