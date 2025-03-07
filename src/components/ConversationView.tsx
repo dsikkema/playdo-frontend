@@ -7,9 +7,19 @@ import Message from './Message'
 
 export type ConversationViewProps = {
   conversationId: number | null
+  currentCode?: string
+  stdout?: string | null
+  stderr?: string | null
+  outputIsStale?: boolean
 }
 
-function ConversationView({ conversationId }: ConversationViewProps) {
+function ConversationView({
+  conversationId,
+  currentCode = '',
+  stdout = null,
+  stderr = null,
+  outputIsStale = false
+}: ConversationViewProps) {
   // State to store the conversation data
   const [conversation, setConversation] = useState<Conversation | null>(null)
   // State to track loading status
@@ -20,6 +30,16 @@ function ConversationView({ conversationId }: ConversationViewProps) {
   const [messageInput, setMessageInput] = useState('')
   // State to track if a message is being sent
   const [sending, setSending] = useState(false)
+  // State to track the last sent code and output
+  const [lastSentCode, setLastSentCode] = useState<string | null>(null)
+  const [lastSentOutput, setLastSentOutput] = useState<{
+    stdout: string | null
+    stderr: string | null
+  }>({ stdout: null, stderr: null })
+  // Timeout reference
+  const [sendingTimeout, setSendingTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  )
 
   // Effect to fetch the conversation when the component mounts
   useEffect(() => {
@@ -56,12 +76,58 @@ function ConversationView({ conversationId }: ConversationViewProps) {
       return
     }
 
+    // Clear any existing timeout
+    if (sendingTimeout) {
+      clearTimeout(sendingTimeout)
+    }
+
+    // Set a timeout to release the UI if no response
+    const timeout = setTimeout(() => {
+      setSending(false)
+      setError('The request is taking longer than expected. Please try again.')
+    }, 10000) // 10 seconds timeout
+
+    setSendingTimeout(timeout)
+
     try {
       setSending(true)
+
+      // Determine what code and output to send
+      const codeToSend = currentCode !== lastSentCode ? currentCode : null
+
+      // Only send output if it matches the current code (not stale) and is different from last sent
+      const stdoutToSend =
+        !outputIsStale &&
+        (codeToSend !== null || stdout !== lastSentOutput.stdout)
+          ? stdout
+          : null
+
+      const stderrToSend =
+        !outputIsStale &&
+        (codeToSend !== null || stderr !== lastSentOutput.stderr)
+          ? stderr
+          : null
+
       const updatedConversation = await sendMessage(
         conversationId,
-        messageInput
+        messageInput,
+        codeToSend,
+        stdoutToSend,
+        stderrToSend
       )
+
+      // Update last sent code and output if we sent them
+      if (codeToSend !== null) {
+        setLastSentCode(currentCode)
+      }
+
+      if (stdoutToSend !== null || stderrToSend !== null) {
+        setLastSentOutput({
+          stdout: stdoutToSend !== null ? stdout : lastSentOutput.stdout,
+          stderr: stderrToSend !== null ? stderr : lastSentOutput.stderr
+        })
+      }
+
       setConversation(updatedConversation)
       setMessageInput('') // Clear the input after sending
     } catch (err) {
@@ -69,6 +135,9 @@ function ConversationView({ conversationId }: ConversationViewProps) {
       console.error(err)
     } finally {
       setSending(false)
+      if (sendingTimeout) {
+        clearTimeout(sendingTimeout)
+      }
     }
   }
 

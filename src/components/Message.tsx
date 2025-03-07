@@ -36,6 +36,10 @@ function Message({ message }: MessageProps) {
     processContent()
   }, [messageText])
 
+  // Check if the message contains code
+  const hasCode =
+    isUser && message.editorCode !== undefined && message.editorCode !== null
+
   return (
     <div className="flex w-full">
       <div
@@ -52,6 +56,12 @@ function Message({ message }: MessageProps) {
         </div>
         <div className="prose prose-slate max-w-none">
           <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
+          {/* Show code updated indicator */}
+          {hasCode && (
+            <div className="mt-2 text-xs italic text-gray-500">
+              Code updated
+            </div>
+          )}
         </div>
       </div>
     </div>

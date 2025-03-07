@@ -8,6 +8,9 @@ type ContentItem = {
 export type Message = {
   content: ContentItem[]
   role: 'user' | 'assistant'
+  editorCode?: string | null // New field for the code in the editor
+  stdout?: string | null // New field for standard output
+  stderr?: string | null // New field for standard error
 }
 
 // Conversation structure

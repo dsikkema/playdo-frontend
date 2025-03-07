@@ -35,7 +35,10 @@ export async function fetchConversationIds(): Promise<number[]> {
 
 export async function sendMessage(
   conversationId: number,
-  message: string
+  message: string,
+  editorCode: string | null = null,
+  stdout: string | null = null,
+  stderr: string | null = null
 ): Promise<Conversation> {
   try {
     const response = await fetch(
@@ -45,7 +48,12 @@ export async function sendMessage(
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message })
+        body: JSON.stringify({
+          message,
+          editor_code: editorCode,
+          stdout,
+          stderr
+        })
       }
     )
 

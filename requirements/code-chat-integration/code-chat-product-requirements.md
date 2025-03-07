@@ -9,6 +9,7 @@ The Playdo learning environment seamlessly integrates a code editor with an AI t
 ### Writing and Running Code
 
 When a student is working in the code editor, they can:
+
 1. Write Python code in the editor
 2. Click the green "Run" button to execute their code
 3. See execution output immediately below the editor
@@ -20,6 +21,7 @@ During this process, the chat interface remains accessible but does not automati
 ### Communicating with the AI Tutor
 
 When a student wants to communicate with the AI tutor:
+
 1. They type a message in the chat input field
 2. They send the message by clicking "Send" or pressing Enter
 3. Behind the scenes, the system automatically includes their current code and latest output with their message
@@ -32,6 +34,7 @@ The student does not need to explicitly "share" their code with the tutor – th
 ### Code Context Indicators
 
 When a student sends a message that includes new code or output:
+
 1. The message appears in the chat interface as normal
 2. A subtle "Code updated" indicator appears in italics with the message
 3. The student does not see their full code repeated in the chat, keeping the conversation clean and focused
@@ -41,6 +44,7 @@ This indicator helps students understand that the AI tutor is aware of their cur
 ### Message Sending State
 
 When a student sends a message:
+
 1. The input field becomes temporarily disabled
 2. A subtle loading indicator appears
 3. After receiving a response (or after a timeout), the input field becomes active again
@@ -52,6 +56,7 @@ This provides clear feedback about the message sending process without disruptin
 ### Getting Help with Code
 
 When a student encounters a problem:
+
 1. They write and run code that produces an error or unexpected result
 2. They ask for help in the chat (e.g., "Why isn't my code working?")
 3. The AI tutor responds with guidance that references their specific code and error messages
@@ -61,6 +66,7 @@ When a student encounters a problem:
 ### Learning New Concepts
 
 As a student progresses through concepts:
+
 1. They experiment with code based on the tutor's guidance
 2. They run the code to see the results
 3. They continue the conversation with the tutor, with each message automatically including their current code state
@@ -69,6 +75,7 @@ As a student progresses through concepts:
 ### Multiple Code Iterations
 
 During a learning session:
+
 1. Students can freely modify their code multiple times
 2. Each new message to the tutor automatically includes the latest code
 3. Students don't need to explicitly tell the tutor "I changed the code" - this context is automatically included

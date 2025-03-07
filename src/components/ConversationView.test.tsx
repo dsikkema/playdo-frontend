@@ -182,7 +182,13 @@ describe('<ConversationView />', () => {
     })
 
     // Verify the API was called correctly
-    expect(mockSendMessage).toHaveBeenCalledWith(conversationId, user_msg)
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      conversationId,
+      user_msg,
+      '',
+      null,
+      null
+    )
   })
 
   // Test case for conversation with a single message
@@ -323,7 +329,13 @@ describe('<ConversationView />', () => {
       expect(screen.getByText('Response to new message')).toBeInTheDocument()
     })
 
-    expect(mockSendMessage).toHaveBeenCalledWith(conversationId, 'New message')
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      conversationId,
+      'New message',
+      '',
+      null,
+      null
+    )
   })
 
   // Test case for error handling when sending a message
@@ -377,7 +389,10 @@ describe('<ConversationView />', () => {
 
     expect(mockSendMessage).toHaveBeenCalledWith(
       conversationId,
-      'This will fail'
+      'This will fail',
+      '',
+      null,
+      null
     )
   })
 })

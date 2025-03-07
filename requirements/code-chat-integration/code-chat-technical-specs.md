@@ -26,6 +26,7 @@ const messageText = message.content
 ```
 
 We need to update this to:
+
 1. Still primarily display the text content
 2. Add indicators when code is included
 3. Track what code has been sent to avoid duplication
@@ -33,31 +34,35 @@ We need to update this to:
 ### Implementation Guide:
 
 1. Update the Message type definition:
+
    ```typescript
    interface Message {
-     role: 'user' | 'assistant';
-     content: Array<{type: string, text: string}>;
-     editorCode?: string | null;
-     stdout?: string | null;
-     stderr?: string | null;
+     role: 'user' | 'assistant'
+     content: Array<{ type: string; text: string }>
+     editorCode?: string | null
+     stdout?: string | null
+     stderr?: string | null
    }
    ```
 
 2. Modify the Message component to indicate when code was updated:
+
    - Add a subtle "Code updated" indicator in italics when `editorCode` is present
    - Keep the primary focus on the message text
 
 3. Implement state tracking in the chat container component:
+
    ```typescript
    // Add state for tracking last sent code/output
-   const [lastSentCode, setLastSentCode] = useState<string | null>(null);
+   const [lastSentCode, setLastSentCode] = useState<string | null>(null)
    const [lastRunOutput, setLastRunOutput] = useState<{
-     stdout: string | null;
-     stderr: string | null;
-   }>({ stdout: null, stderr: null });
+     stdout: string | null
+     stderr: string | null
+   }>({ stdout: null, stderr: null })
    ```
 
 4. Update the sendMessage function to include code context:
+
    - Compare current code with lastSentCode
    - Add special handling for the case where code is unchanged but output is new
    - Update tracking state after successful sending
@@ -75,20 +80,22 @@ Update the message sending mechanism to include code and output information:
 
 ```typescript
 interface MessageToSend {
-  messageText: string;         // The user's typed message
-  editorCode: string | null;   // Current code in editor (null if unchanged since last message)
-  stdout: string | null;       // Standard output (null if code unchanged or not run)
-  stderr: string | null;       // Standard error (null if code unchanged or not run)
+  messageText: string // The user's typed message
+  editorCode: string | null // Current code in editor (null if unchanged since last message)
+  stdout: string | null // Standard output (null if code unchanged or not run)
+  stderr: string | null // Standard error (null if code unchanged or not run)
 }
 ```
 
 ### State Tracking
 
 1. Implement tracking of the last sent code and output:
+
    - Store references to the last code and output sent to the backend
    - Compare current code/output against these references when preparing messages
 
 2. Implement logic to determine when to attach code and output:
+
    - Send code when it differs from last sent code
    - Handle the edge case where code is unchanged but output is new (user ran unchanged code)
    - Use `null` for output fields when code hasn't been run yet
@@ -99,7 +106,6 @@ interface MessageToSend {
      flag, and then when code is run, we clear the flag. That flag drives the frontend to only send stdout/stderr if the
      output is not stale, and nulls otherwise (while still sending the current code).
 
-
 3. UI Blocking during Message Sending:
    - Block the message input while waiting for a response
    - Implement a timeout (approximately 10 seconds) to release the UI block if no response
@@ -108,6 +114,7 @@ interface MessageToSend {
 ### UI Updates
 
 1. Update the message rendering to:
+
    - Display only the `messageText` content in the primary message
    - Add a small "Code updated" note in italics when a message includes code
 
@@ -116,22 +123,26 @@ interface MessageToSend {
 ## Implementation Milestones
 
 ### Milestone 1: Backend Data Model
+
 1. Update the `Message` model with new fields
 2. Create the database schema
 3. Update the repository layer to handle the new fields
 
 ### Milestone 2: Backend Transformation Layer
+
 1. Implement the XML conversion logic
 2. Add the Anthropic message transformation function
 3. Update the API endpoint to use the new transformation
 
 ### Milestone 3: Frontend State Tracking
+
 1. Implement the lastSentCode and lastSentOutput state
 2. Add the comparison logic to determine when to send code/output
 3. Update the message sending function
 4. Preventing stale output from being sent to the backend
 
 ### Milestone 4: Frontend UI Updates
+
 1. Update the message rendering to show the "Code updated" indicator
 2. Implement UI blocking during message sending
 3. Add timeout handling
@@ -143,7 +154,8 @@ interface MessageToSend {
    ```typescript
    const shouldSendUpdate =
      currentCode !== lastSentCode ||
-     (runStatus.hasRun && (lastSentOutput.stdout === null || lastSentOutput.stderr === null));
+     (runStatus.hasRun &&
+       (lastSentOutput.stdout === null || lastSentOutput.stderr === null))
    ```
 
 2. **Null vs. Empty String**: Maintain the distinction between null (code not run) and empty string (code run with no output).
