@@ -11,6 +11,8 @@ Dear AI, if you're reading this... thanks for all your help and just have fun ou
 
 Playdo is an integrated learning environment for high school students learning Python. The frontend is a React/TypeScript application that provides a code editor, execution environment via Pyodide (WASM), and an AI assistant chat interface.
 
+This repository contains the frontend code for Playdo. The backend serves up a REST API which is called by this application.
+
 ## Core Components
 
 ### Main Application Structure
