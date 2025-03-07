@@ -57,10 +57,10 @@ export function usePythonExecution() {
   // Execute Python code
   const executeCode = useCallback(
     async (code: string) => {
+      console.log("RUNNING, croix")
       try {
         // Set code running state and clear previous results
-        setState((prev) => ({
-          ...prev,
+        const new_state = {
           isCodeRunning: true,
           result: {
             stdout: '',
@@ -68,6 +68,11 @@ export function usePythonExecution() {
             error: null,
             result: null
           }
+        }
+        console.log("new_state, in running", new_state)
+        setState((prev) => ({
+          ...prev,
+          ...new_state
         }))
 
         // Initialize if needed
@@ -77,6 +82,7 @@ export function usePythonExecution() {
 
         // Execute the code
         const result = await pyodideService.executeCode(code)
+        console.log("result, in running", result)
 
         // Update state with results
         setState((prev) => ({
@@ -88,6 +94,7 @@ export function usePythonExecution() {
 
         return result
       } catch (error) {
+        console.log("ERROR, croix")
         // Handle execution errors
         setState((prev) => ({
           ...prev,
