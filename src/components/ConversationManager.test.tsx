@@ -186,8 +186,8 @@ describe('<ConversationView />', () => {
       conversationId,
       user_msg,
       '',
-      null,
-      null
+      '',
+      ''
     )
   })
 
@@ -333,8 +333,8 @@ describe('<ConversationView />', () => {
       conversationId,
       'New message',
       '',
-      null,
-      null
+      '',
+      ''
     )
   })
 
@@ -391,8 +391,8 @@ describe('<ConversationView />', () => {
       conversationId,
       'This will fail',
       '',
-      null,
-      null
+      '',
+      ''
     )
   })
 })

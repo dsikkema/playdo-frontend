@@ -32,10 +32,6 @@ function ConversationManager({
   const [sending, setSending] = useState(false)
   // State to track the last sent code and output
   const [lastSentCode, setLastSentCode] = useState<string | null>(null)
-  const [lastSentOutput, setLastSentOutput] = useState<{
-    stdout: string | null
-    stderr: string | null
-  }>({ stdout: null, stderr: null })
   // Timeout reference
   const [sendingTimeout, setSendingTimeout] = useState<NodeJS.Timeout | null>(
     null
@@ -95,18 +91,13 @@ function ConversationManager({
       // Determine what code and output to send
       const codeToSend = currentCode !== lastSentCode ? currentCode : null
 
-      // Only send output if it matches the current code (not stale) and is different from last sent
-      const stdoutToSend =
-        !outputIsStale &&
-        (codeToSend !== null || stdout !== lastSentOutput.stdout)
-          ? stdout
-          : null
-
-      const stderrToSend =
-        !outputIsStale &&
-        (codeToSend !== null || stderr !== lastSentOutput.stderr)
-          ? stderr
-          : null
+      // Only send output if it matches the current code (not stale) and is different from last sent, and if code is being sent
+      let stdoutToSend: string | null = null
+      let stderrToSend: string | null = null
+      if (codeToSend !== null && !outputIsStale) {
+        stdoutToSend = stdout === null ? '' : stdout
+        stderrToSend = stderr === null ? '' : stderr
+      }
 
       const updatedConversation = await sendMessage(
         conversationId,
@@ -119,13 +110,6 @@ function ConversationManager({
       // Update last sent code and output if we sent them
       if (codeToSend !== null) {
         setLastSentCode(currentCode)
-      }
-
-      if (stdoutToSend !== null || stderrToSend !== null) {
-        setLastSentOutput({
-          stdout: stdoutToSend !== null ? stdout : lastSentOutput.stdout,
-          stderr: stderrToSend !== null ? stderr : lastSentOutput.stderr
-        })
       }
 
       setConversation(updatedConversation)

@@ -54,14 +54,12 @@ function Message({ message }: MessageProps) {
         <div className="mb-1 text-sm font-medium">
           {isUser ? 'You' : 'Assistant'}
         </div>
+        {/* Show code updated indicator */}
+        {hasCode && (
+          <div className="mt-2 text-xs italic text-gray-500">Code updated</div>
+        )}
         <div className="prose prose-slate max-w-none">
           <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
-          {/* Show code updated indicator */}
-          {hasCode && (
-            <div className="mt-2 text-xs italic text-gray-500">
-              Code updated
-            </div>
-          )}
         </div>
       </div>
     </div>
