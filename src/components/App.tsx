@@ -1,6 +1,6 @@
 // src/components/App.tsx
 import { useState, useEffect } from 'react'
-import ConversationView from './ConversationView'
+import ConversationManager from './ConversationManager'
 import ConversationSelector from './ConversationSelector'
 import CodeEditor from './CodeEditor'
 import OutputDisplay from './OutputDisplay'
@@ -88,7 +88,7 @@ function App() {
             </div>
           </div>
           <div className="flex h-[60vh] flex-col">
-            <ConversationView
+            <ConversationManager
               conversationId={selectedConversationId}
               currentCode={code}
               stdout={result?.stdout || null}

@@ -45,7 +45,7 @@ vi.mock('./ConversationSelector', () => ({
   )
 }))
 
-vi.mock('./ConversationView', () => ({
+vi.mock('./ConversationManager', () => ({
   default: ({ conversationId }: { conversationId: number | null }) => (
     <div data-testid="mock-conversation-view">
       {conversationId

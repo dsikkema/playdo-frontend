@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { act } from 'react'
-import ConversationView from './ConversationView'
+import ConversationManager from './ConversationManager'
 import { fetchConversation, sendMessage } from '../services/api'
 import { Conversation } from '../types'
 
@@ -48,7 +48,7 @@ describe('<ConversationView />', () => {
   it('shows "select a conversation" message when no conversation is selected', async () => {
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={null} />)
+      render(<ConversationManager conversationId={null} />)
     })
 
     // Assert
@@ -68,7 +68,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert
@@ -85,7 +85,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert
@@ -140,7 +140,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert - Step 1: Verify empty conversation state
@@ -210,7 +210,7 @@ describe('<ConversationView />', () => {
     // Act
     const conversationId = 1
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert
@@ -249,7 +249,7 @@ describe('<ConversationView />', () => {
     // Act
     const conversationId = 2
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert
@@ -304,7 +304,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Wait for the initial conversation to load
@@ -361,7 +361,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Wait for the initial conversation to load

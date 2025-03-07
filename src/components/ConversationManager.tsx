@@ -5,7 +5,7 @@ import { Conversation } from '../types'
 import { fetchConversation, sendMessage } from '../services/api'
 import Message from './Message'
 
-export type ConversationViewProps = {
+export type ConversationManagerProps = {
   conversationId: number | null
   currentCode?: string
   stdout?: string | null
@@ -13,13 +13,13 @@ export type ConversationViewProps = {
   outputIsStale?: boolean
 }
 
-function ConversationView({
+function ConversationManager({
   conversationId,
   currentCode = '',
   stdout = null,
   stderr = null,
   outputIsStale = false
-}: ConversationViewProps) {
+}: ConversationManagerProps) {
   // State to store the conversation data
   const [conversation, setConversation] = useState<Conversation | null>(null)
   // State to track loading status
@@ -221,4 +221,4 @@ function ConversationView({
   )
 }
 
-export default ConversationView
+export default ConversationManager
