@@ -1,6 +1,6 @@
 // src/components/Conversation.tsx
 
-import { useEffect, useState, FormEvent, ChangeEvent } from 'react'
+import { useEffect, useState, FormEvent, ChangeEvent, useRef } from 'react'
 import { Conversation } from '../types'
 import { fetchConversation, sendMessage } from '../services/api'
 import Message from './Message'
@@ -32,10 +32,8 @@ function ConversationManager({
   const [sending, setSending] = useState(false)
   // State to track the last sent code and output
   const [lastSentCode, setLastSentCode] = useState<string | null>(null)
-  // Timeout reference
-  const [sendingTimeout, setSendingTimeout] = useState<NodeJS.Timeout | null>(
-    null
-  )
+  // Timeout reference - using useRef instead of useState for reliable cleanup
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Effect to fetch the conversation when the component mounts
   useEffect(() => {
@@ -73,17 +71,16 @@ function ConversationManager({
     }
 
     // Clear any existing timeout
-    if (sendingTimeout) {
-      clearTimeout(sendingTimeout)
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
     }
 
     // Set a timeout to release the UI if no response
-    const timeout = setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setSending(false)
       setError('The request is taking longer than expected. Please try again.')
     }, 10000) // 10 seconds timeout
-
-    setSendingTimeout(timeout)
 
     try {
       setSending(true)
@@ -119,8 +116,10 @@ function ConversationManager({
       console.error(err)
     } finally {
       setSending(false)
-      if (sendingTimeout) {
-        clearTimeout(sendingTimeout)
+      // Clear the timeout if it exists
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
       }
     }
   }
@@ -133,6 +132,16 @@ function ConversationManager({
     e.target.style.height = 'auto'
     e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`
   }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+    }
+  }, [])
 
   if (conversationId == null) {
     return (
