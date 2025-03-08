@@ -49,7 +49,7 @@ function Message({ message }: MessageProps) {
         )}
       >
         <div className="mb-1 text-sm font-medium">
-          {isUser ? 'You' : 'Assistant'}
+          {isUser ? 'You' : 'Playdo'}
         </div>
         <div
           className="prose prose-slate max-w-none"
