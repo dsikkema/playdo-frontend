@@ -83,6 +83,7 @@ src
 ### Code-Chat Integration
 
 - **ConversationManager.tsx**: Enhanced to support code context tracking
+
   - Tracks the last sent code to avoid sending duplicate code
   - Intelligently attaches code and output to messages only when changed
   - Manages UI state during message sending with timeout handling
@@ -149,6 +150,7 @@ The frontend communicates with the Flask backend API for:
 ### Enhanced Message Format
 
 - Messages sent to the backend now include:
+
   - The user's typed message text
   - Current code in editor (when changed since last message)
   - stdout and stderr (when code has been run and output is not stale)

@@ -34,6 +34,19 @@ function ConversationManager({
   const [lastSentCode, setLastSentCode] = useState<string | null>(null)
   // Timeout reference - using useRef instead of useState for reliable cleanup
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  // Reference to the message container for scrolling
+  const messageContainerRef = useRef<HTMLDivElement>(null)
+  // Reference to the end of messages for scrolling
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Function to scroll only the message container to the bottom
+  const scrollToBottom = () => {
+    if (messagesEndRef.current && messageContainerRef.current) {
+      // Using scrollIntoView with a specific container
+      messageContainerRef.current.scrollTop =
+        messageContainerRef.current.scrollHeight
+    }
+  }
 
   // Effect to fetch the conversation when the component mounts
   useEffect(() => {
@@ -62,6 +75,22 @@ function ConversationManager({
 
     loadConversation()
   }, [conversationId]) // Update component every time passed in conversationID changes
+
+  // Scroll when conversation changes (either initially loaded or updated with new messages)
+  useEffect(() => {
+    if (
+      conversation &&
+      conversation.messages &&
+      conversation.messages.length > 0
+    ) {
+      // Add a small delay to ensure content is rendered before scrolling
+      const timeoutId = setTimeout(() => {
+        scrollToBottom()
+      }, 100)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [conversation])
 
   // Function to handle sending a message
   const handleSendMessage = async (e: FormEvent) => {
@@ -163,54 +192,65 @@ function ConversationManager({
   }
 
   return (
-    <div className="mx-auto flex h-full max-w-2xl flex-col p-4">
-      <h1 className="mb-6 text-2xl font-bold">
-        Conversation #{conversation?.id || conversationId}
-      </h1>
-
-      {/* Message list with overflow scrolling */}
-      <div className="mb-4 flex-1 space-y-4 overflow-y-auto">
-        {conversation &&
-        conversation.messages &&
-        conversation.messages.length > 0 ? (
-          conversation.messages.map((message, index) => (
-            <Message key={index} message={message} />
-          ))
-        ) : (
-          <div className="py-8">
-            No messages found. Start the conversation by sending a message
-            below.
-          </div>
-        )}
+    <div className="flex h-full flex-col">
+      {/* Fixed conversation title */}
+      <div className="shrink-0 pb-2">
+        <h1 className="text-2xl font-bold">
+          Conversation #{conversation?.id || conversationId}
+        </h1>
       </div>
 
-      {/* Message input form with auto-expanding textarea */}
-      <form onSubmit={handleSendMessage} className="mt-auto flex items-start">
-        <textarea
-          value={messageInput}
-          onChange={handleTextareaChange}
-          placeholder="Type your message..."
-          className="flex-1 resize-none overflow-y-auto rounded-l-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={sending}
-          rows={1}
-          style={{ minHeight: '42px', maxHeight: '150px' }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              if (messageInput.trim() && !sending) {
-                handleSendMessage(e)
+      {/* Scrollable message container - flex grow to fill available space */}
+      <div ref={messageContainerRef} className="mb-2 grow overflow-y-auto pr-1">
+        <div className="space-y-4">
+          {conversation &&
+          conversation.messages &&
+          conversation.messages.length > 0 ? (
+            <>
+              {conversation.messages.map((message, index) => (
+                <Message key={index} message={message} />
+              ))}
+              {/* Invisible element at the end to scroll to */}
+              <div ref={messagesEndRef} />
+            </>
+          ) : (
+            <div className="py-8 text-center text-gray-500">
+              No messages found. Start the conversation by sending a message
+              below.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Fixed message input area */}
+      <div className="shrink-0 border-t border-gray-200 pt-2">
+        <form onSubmit={handleSendMessage} className="flex items-start">
+          <textarea
+            value={messageInput}
+            onChange={handleTextareaChange}
+            placeholder="Type your message..."
+            className="flex-1 resize-none overflow-y-auto rounded-l-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={sending}
+            rows={1}
+            style={{ minHeight: '42px', maxHeight: '150px' }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                if (messageInput.trim() && !sending) {
+                  handleSendMessage(e)
+                }
               }
-            }
-          }}
-        />
-        <button
-          type="submit"
-          className="h-[42px] rounded-r-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
-          disabled={sending || !messageInput.trim()}
-        >
-          {sending ? 'Sending...' : 'Send'}
-        </button>
-      </form>
+            }}
+          />
+          <button
+            type="submit"
+            className="h-[42px] rounded-r-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+            disabled={sending || !messageInput.trim()}
+          >
+            {sending ? 'Sending...' : 'Send'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
