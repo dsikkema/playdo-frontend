@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react'
 export interface OutputDisplayProps {
   stdout: string
   stderr: string
-  error: string | null
   isCodeRunning?: boolean
   isPyodideInitializing?: boolean
 }
@@ -11,7 +10,6 @@ export interface OutputDisplayProps {
 function OutputDisplay({
   stdout,
   stderr,
-  error,
   isCodeRunning = false,
   isPyodideInitializing = false
 }: OutputDisplayProps) {
@@ -22,10 +20,9 @@ function OutputDisplay({
     if (outputRef.current) {
       outputRef.current.scrollTop = outputRef.current.scrollHeight
     }
-  }, [stdout, stderr, error])
+  }, [stdout, stderr])
 
-  const hasOutput = stdout || stderr || error
-  const hasError = stderr || error
+  const hasOutput = stdout || stderr
 
   return (
     <div className="flex size-full flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -76,17 +73,12 @@ function OutputDisplay({
         )}
 
         {/* Error output (stderr and exceptions) */}
-        {hasError && (
+        {stderr && (
           <pre
             className="whitespace-pre-wrap break-words text-red-500"
             data-testid="error-output"
           >
             {stderr && <span>{stderr}</span>}
-            {error && (
-              <span className="block font-bold">
-                {stderr ? '\n' : ''}Error: {error}
-              </span>
-            )}
           </pre>
         )}
       </div>

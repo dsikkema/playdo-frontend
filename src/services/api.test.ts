@@ -146,7 +146,12 @@ describe('API Service', () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ message: mockMessage })
+          body: JSON.stringify({
+            message: mockMessage,
+            editor_code: null,
+            stdout: null,
+            stderr: null
+          })
         }
       )
       expect(result).toEqual(mockUpdatedConversation)

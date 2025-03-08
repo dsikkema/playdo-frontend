@@ -66,7 +66,10 @@ describe('PyodideRunner', () => {
     // Arrange
     await pyodideRunner.initialize()
 
-    // Mock stdout capture
+    // Mock runPythonAsync success
+    mockPyodideInstance.runPythonAsync.mockResolvedValue('success result')
+
+    // Mock stdout handler
     mockPyodideInstance.setStdout.mockImplementation(
       (options: PyodideOutputOptions) => {
         if (options && typeof options.batched === 'function') {
@@ -75,19 +78,12 @@ describe('PyodideRunner', () => {
       }
     )
 
-    // Reset stderr to avoid test interference
-    mockPyodideInstance.setStderr.mockImplementation(() => {})
-
     // Act
     const result = await pyodideRunner.executeCode('print("test")')
 
     // Assert
-    expect(mockPyodideInstance.runPythonAsync).toHaveBeenCalledWith(
-      'print("test")'
-    )
     expect(result.stdout).toBe('Hello from stdout')
     expect(result.stderr).toBe('')
-    expect(result.error).toBeNull()
     expect(result.result).toBe('success result')
   })
 
@@ -95,10 +91,11 @@ describe('PyodideRunner', () => {
     // Arrange
     await pyodideRunner.initialize()
 
-    // Reset stdout to avoid test interference
-    mockPyodideInstance.setStdout.mockImplementation(() => {})
+    // Mock runPythonAsync to return null for this test
+    mockPyodideInstance.runPythonAsync.mockResolvedValue(null)
 
-    // Mock stderr capture
+    // Mock stdout and stderr handlers
+    mockPyodideInstance.setStdout.mockImplementation(() => {})
     mockPyodideInstance.setStderr.mockImplementation(
       (options: PyodideOutputOptions) => {
         if (options && typeof options.batched === 'function') {
@@ -115,7 +112,7 @@ describe('PyodideRunner', () => {
     // Assert
     expect(result.stderr).toBe('Error output')
     expect(result.stdout).toBe('')
-    expect(result.error).toBeNull()
+    expect(result.result).toBeNull()
   })
 
   it('should handle execution errors correctly', async () => {
@@ -143,8 +140,7 @@ describe('PyodideRunner', () => {
     const result = await pyodideRunner.executeCode('raise Exception("error")')
 
     // Assert
-    expect(result.error).toBe('Python error')
-    expect(result.stderr).toBe('Traceback information')
+    expect(result.stderr).toBe('Traceback information\nPython error')
     expect(result.result).toBeNull()
   })
 

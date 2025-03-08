@@ -11,14 +11,16 @@ Dear AI, if you're reading this... thanks for all your help and just have fun ou
 
 Playdo is an integrated learning environment for high school students learning Python. The frontend is a React/TypeScript application that provides a code editor, execution environment via Pyodide (WASM), and an AI assistant chat interface.
 
+This repository contains the frontend code for Playdo. The backend serves up a REST API which is called by this application.
+
 ## Core Components
 
 ### Main Application Structure
 
 - **App.tsx**: Central component that manages application state and coordinates between the code editor, output display, and conversation components
 - **CodeEditor.tsx**: Provides syntax-highlighted code editing capabilities
-- **OutputDisplay.tsx**: Shows execution results, including stdout, stderr, and error messages
-- **ConversationView.tsx**: Manages the AI assistant chat interface
+- **OutputDisplay.tsx**: Shows execution results, including stdout and stderr
+- **ConversationManager.tsx**: Manages the AI assistant chat interface with code context tracking
 - **Message.tsx**: Renders individual conversation messages with markdown support and HTML sanitization
 
 ### `src/` File Structure
@@ -32,10 +34,10 @@ src
 │   ├── App.tsx
 │   ├── CodeEditor.test.tsx
 │   ├── CodeEditor.tsx
+│   ├── ConversationManager.test.tsx
+│   ├── ConversationManager.tsx
 │   ├── ConversationSelector.test.tsx
 │   ├── ConversationSelector.tsx
-│   ├── ConversationView.test.tsx
-│   ├── ConversationView.tsx
 │   ├── Message.test.tsx
 │   ├── Message.tsx
 │   ├── OutputDisplay.test.tsx
@@ -66,15 +68,29 @@ src
    - App.tsx calls `executeCode()` from the usePythonExecution hook
    - Python code executes in the browser via Pyodide
    - Results display in OutputDisplay component
+   - App sets the `outputIsStale` flag to false, indicating that the output matches the current code
 
 2. **Conversation Flow**:
-   - User types messages in the ConversationView component
+   - User types messages in the ConversationManager component
+   - ConversationManager automatically attaches current code and output (when appropriate) to messages
    - Messages are sent to the backend Flask API
    - Backend communicates with Claude AI and returns responses
-   - Responses are displayed in the ConversationView
+   - Responses are displayed in the conversation view
    - Messages are rendered with markdown support and sanitized HTML using the Message component
 
 ## Technical Implementation
+
+### Code-Chat Integration
+
+- **ConversationManager.tsx**: Enhanced to support code context tracking
+  - Tracks the last sent code to avoid sending duplicate code
+  - Intelligently attaches code and output to messages only when changed
+  - Manages UI state during message sending with timeout handling
+  - Prevents stale output (from previous code versions) from being sent
+
+- **Message Types**: Enhanced to support code context
+  - Messages now include optional fields for editor code, stdout, and stderr
+  - UI indicates when messages include code updates without cluttering the conversation
 
 ### Pyodide Integration
 
@@ -83,9 +99,10 @@ src
   - Handles initialization of the Python environment
   - Provides methods to execute Python code and capture output
   - Manages Pyodide's lifecycle states (uninitialized, loading, ready, error)
+  - captures stdout and stderr from Python code
 
 - **usePythonExecution.ts**: React hook that wraps the Pyodide service
-  - Manages state for code execution (running, results, errors)
+  - Manages state for code execution (running, results)
   - Handles initialization of Pyodide when components mount
   - Provides simplified interface for React components
 
@@ -95,6 +112,7 @@ src
 
   - Selected conversation ID
   - Current code in editor
+  - Output staleness tracking
   - Coordinates the Python execution process
 
 - **CodeEditor.tsx**: Accepts props for:
@@ -106,12 +124,14 @@ src
 
   - Standard output (stdout)
   - Error output (stderr)
-  - Runtime errors
   - Loading/execution states
 
-- **ConversationView.tsx**: Uses props for:
+- **ConversationManager.tsx**: Uses props for:
 
   - Conversation ID to load and display messages
+  - Current code in editor
+  - Stdout and stderr from latest execution
+  - Flag indicating if output is stale (code changed since last run)
 
 - **Message.tsx**: Uses props for:
   - Message data to render content
@@ -125,6 +145,18 @@ The frontend communicates with the Flask backend API for:
 - Retrieving and sending conversation messages
 - Storing code snippets and execution results
 - Tracking learning progress
+
+### Enhanced Message Format
+
+- Messages sent to the backend now include:
+  - The user's typed message text
+  - Current code in editor (when changed since last message)
+  - stdout and stderr (when code has been run and output is not stale)
+
+- This integration enables:
+  - Seamless code context sharing without cluttering the UI
+  - Automatic inclusion of relevant code with each user message
+  - Intelligent tracking to minimize data sent to the backend
 
 ## Key Design Principles
 

@@ -45,7 +45,6 @@ if (isBrowser) {
 
         it('should execute simple Python code and return the result', async () => {
           const result = await pyodideService.executeCode('1 + 1')
-          expect(result.error).toBeNull()
           expect(result.result).toBe(2)
         }, 10000)
 
@@ -53,7 +52,6 @@ if (isBrowser) {
           const result = await pyodideService.executeCode(
             'print("Hello from Python!")'
           )
-          expect(result.error).toBeNull()
           expect(result.stdout).toContain('Hello from Python!')
         }, 10000)
 
@@ -61,15 +59,14 @@ if (isBrowser) {
           const result = await pyodideService.executeCode(
             'raise ValueError("Test error")'
           )
-          expect(result.error).not.toBeNull()
-          expect(result.error).toContain('ValueError')
+          // Python errors now appear in stderr instead of a separate error property
+          expect(result.stderr).toContain('ValueError')
           expect(result.result).toBeNull()
         }, 10000)
 
         it('should execute multiple statements and maintain state between them', async () => {
           await pyodideService.executeCode('x = 42')
           const result = await pyodideService.executeCode('print(x)')
-          expect(result.error).toBeNull()
           expect(result.stdout).toContain('42')
         }, 10000)
 
@@ -79,7 +76,6 @@ import math
 result = math.sqrt(16)
 print(f"The square root of 16 is {result}")
           `)
-          expect(result.error).toBeNull()
           expect(result.stdout).toContain('The square root of 16 is 4.0')
         }, 10000)
 
@@ -89,7 +85,6 @@ data = {"name": "John", "age": 30, "scores": [90, 85, 95]}
 print(f"Name: {data['name']}, Average score: {sum(data['scores']) / len(data['scores'])}")
 data
           `)
-          expect(result.error).toBeNull()
           expect(result.stdout).toContain('Name: John')
           expect(result.stdout).toContain('Average score: 90')
           expect(result.result).toHaveProperty('name', 'John')
@@ -107,7 +102,6 @@ import cowsay
 message = cowsay.cow('Hello from Pyodide!')
 print(message)
           `)
-          expect(result.error).toBeNull()
           expect(result.stdout).toContain('Hello from Pyodide!')
         }, 60000)
 
@@ -128,7 +122,6 @@ js_result = to_js(multiply_proxy(6, 7))
 print(f"6 * 7 = {js_result}")
 js_result
           `)
-          expect(result.error).toBeNull()
           expect(result.stdout).toContain('6 * 7 = 42')
           expect(result.result).toBe(42)
         }, 10000)

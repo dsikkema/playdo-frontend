@@ -1,15 +1,25 @@
 // src/components/Conversation.tsx
 
-import { useEffect, useState, FormEvent, ChangeEvent } from 'react'
+import { useEffect, useState, FormEvent, ChangeEvent, useRef } from 'react'
 import { Conversation } from '../types'
 import { fetchConversation, sendMessage } from '../services/api'
 import Message from './Message'
 
-export type ConversationViewProps = {
+export type ConversationManagerProps = {
   conversationId: number | null
+  currentCode?: string
+  stdout?: string | null
+  stderr?: string | null
+  outputIsStale?: boolean
 }
 
-function ConversationView({ conversationId }: ConversationViewProps) {
+function ConversationManager({
+  conversationId,
+  currentCode = '',
+  stdout = null,
+  stderr = null,
+  outputIsStale = false
+}: ConversationManagerProps) {
   // State to store the conversation data
   const [conversation, setConversation] = useState<Conversation | null>(null)
   // State to track loading status
@@ -20,6 +30,10 @@ function ConversationView({ conversationId }: ConversationViewProps) {
   const [messageInput, setMessageInput] = useState('')
   // State to track if a message is being sent
   const [sending, setSending] = useState(false)
+  // State to track the last sent code and output
+  const [lastSentCode, setLastSentCode] = useState<string | null>(null)
+  // Timeout reference - using useRef instead of useState for reliable cleanup
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Effect to fetch the conversation when the component mounts
   useEffect(() => {
@@ -36,6 +50,7 @@ function ConversationView({ conversationId }: ConversationViewProps) {
         setLoading(true)
         const data = await fetchConversation(conversationId)
         setConversation(data)
+        console.log(`conversation: ${JSON.stringify(data)}`)
         setError(null)
       } catch (err) {
         setError('Failed to load conversation. Please try again later.')
@@ -56,12 +71,45 @@ function ConversationView({ conversationId }: ConversationViewProps) {
       return
     }
 
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+
+    // Set a timeout to release the UI if no response
+    timeoutRef.current = setTimeout(() => {
+      setSending(false)
+      setError('The request is taking longer than expected. Please try again.')
+    }, 10000) // 10 seconds timeout
+
     try {
       setSending(true)
+
+      // Determine what code and output to send
+      const codeToSend = currentCode !== lastSentCode ? currentCode : null
+
+      // Only send output if it matches the current code (not stale) and is different from last sent, and if code is being sent
+      let stdoutToSend: string | null = null
+      let stderrToSend: string | null = null
+      if (codeToSend !== null && !outputIsStale) {
+        stdoutToSend = stdout === null ? '' : stdout
+        stderrToSend = stderr === null ? '' : stderr
+      }
+
       const updatedConversation = await sendMessage(
         conversationId,
-        messageInput
+        messageInput,
+        codeToSend,
+        stdoutToSend,
+        stderrToSend
       )
+
+      // Update last sent code and output if we sent them
+      if (codeToSend !== null) {
+        setLastSentCode(currentCode)
+      }
+
       setConversation(updatedConversation)
       setMessageInput('') // Clear the input after sending
     } catch (err) {
@@ -69,6 +117,11 @@ function ConversationView({ conversationId }: ConversationViewProps) {
       console.error(err)
     } finally {
       setSending(false)
+      // Clear the timeout if it exists
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
     }
   }
 
@@ -80,6 +133,16 @@ function ConversationView({ conversationId }: ConversationViewProps) {
     e.target.style.height = 'auto'
     e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`
   }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+    }
+  }, [])
 
   if (conversationId == null) {
     return (
@@ -152,4 +215,4 @@ function ConversationView({ conversationId }: ConversationViewProps) {
   )
 }
 
-export default ConversationView
+export default ConversationManager

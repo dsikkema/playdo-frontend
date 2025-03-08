@@ -36,6 +36,7 @@ function Message({ message }: MessageProps) {
     processContent()
   }, [messageText])
 
+  // Check if the message contains code
   return (
     <div className="flex w-full">
       <div

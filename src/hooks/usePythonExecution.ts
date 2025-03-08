@@ -37,8 +37,7 @@ export function usePythonExecution() {
         setState((prev) => ({
           ...prev,
           isPyodideInitializing: false,
-          status: pyodideService.getStatus(),
-          error: null
+          status: pyodideService.getStatus()
         }))
       } catch (error) {
         setState((prev) => ({
@@ -59,17 +58,18 @@ export function usePythonExecution() {
     async (code: string) => {
       try {
         // Set code running state and clear previous results
-        setState((prev) => ({
-          ...prev,
+        const new_state = {
           isCodeRunning: true,
           result: {
             stdout: '',
             stderr: '',
-            error: null,
             result: null
           }
+        }
+        setState((prev) => ({
+          ...prev,
+          ...new_state
         }))
-
         // Initialize if needed
         if (state.status === PyodideStatus.UNINITIALIZED) {
           await initialize()
@@ -99,7 +99,6 @@ export function usePythonExecution() {
           result: {
             stdout: '',
             stderr: '',
-            error: error instanceof Error ? error.message : String(error),
             result: null
           }
         }))

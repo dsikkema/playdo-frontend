@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { act } from 'react'
-import ConversationView from './ConversationView'
+import ConversationManager from './ConversationManager'
 import { fetchConversation, sendMessage } from '../services/api'
 import { Conversation } from '../types'
 
@@ -48,7 +48,7 @@ describe('<ConversationView />', () => {
   it('shows "select a conversation" message when no conversation is selected', async () => {
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={null} />)
+      render(<ConversationManager conversationId={null} />)
     })
 
     // Assert
@@ -68,7 +68,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert
@@ -85,7 +85,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert
@@ -140,7 +140,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert - Step 1: Verify empty conversation state
@@ -182,7 +182,13 @@ describe('<ConversationView />', () => {
     })
 
     // Verify the API was called correctly
-    expect(mockSendMessage).toHaveBeenCalledWith(conversationId, user_msg)
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      conversationId,
+      user_msg,
+      '',
+      '',
+      ''
+    )
   })
 
   // Test case for conversation with a single message
@@ -204,7 +210,7 @@ describe('<ConversationView />', () => {
     // Act
     const conversationId = 1
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert
@@ -243,7 +249,7 @@ describe('<ConversationView />', () => {
     // Act
     const conversationId = 2
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Assert
@@ -298,7 +304,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Wait for the initial conversation to load
@@ -323,7 +329,13 @@ describe('<ConversationView />', () => {
       expect(screen.getByText('Response to new message')).toBeInTheDocument()
     })
 
-    expect(mockSendMessage).toHaveBeenCalledWith(conversationId, 'New message')
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      conversationId,
+      'New message',
+      '',
+      '',
+      ''
+    )
   })
 
   // Test case for error handling when sending a message
@@ -349,7 +361,7 @@ describe('<ConversationView />', () => {
 
     // Act
     await act(async () => {
-      render(<ConversationView conversationId={conversationId} />)
+      render(<ConversationManager conversationId={conversationId} />)
     })
 
     // Wait for the initial conversation to load
@@ -377,7 +389,205 @@ describe('<ConversationView />', () => {
 
     expect(mockSendMessage).toHaveBeenCalledWith(
       conversationId,
-      'This will fail'
+      'This will fail',
+      '',
+      '',
+      ''
+    )
+  })
+
+  /**
+   * Tests the code and output tracking logic in ConversationManager
+   *
+   * This test verifies two related behaviors:
+   * 1. Code is only sent in messages when it has changed since the last message
+   * 2. Stdout and stderr are only sent when code is also being sent
+   *
+   * These behaviors ensure that:
+   * - We avoid redundant data in messages (not sending unchanged code repeatedly)
+   * - We maintain the relationship between code and its corresponding output
+   * - We follow the product requirements where code context is automatically shared
+   *   only when necessary without cluttering the conversation
+   */
+  it('should not send unchanged code or output in subsequent messages', async () => {
+    // Arrange
+    const user = userEvent.setup()
+    const conversationId = 1
+    const currentCode = 'print("Test code")'
+    const stdout = 'Test code'
+    const stderr = ''
+    const outputIsStale = false // Output is fresh
+
+    mockFetchConversation.mockResolvedValue({
+      id: conversationId,
+      messages: []
+    })
+
+    // Mock response for the first message
+    mockSendMessage.mockResolvedValueOnce({
+      id: conversationId,
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: 'First message' }],
+          editor_code: currentCode
+        },
+        {
+          role: 'assistant',
+          content: [{ type: 'text', text: 'First response' }]
+        }
+      ]
+    })
+
+    // Mock response for the second message
+    mockSendMessage.mockResolvedValueOnce({
+      id: conversationId,
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: 'First message' }],
+          editor_code: currentCode
+        },
+        {
+          role: 'assistant',
+          content: [{ type: 'text', text: 'First response' }]
+        },
+        {
+          role: 'user',
+          content: [{ type: 'text', text: 'Second message' }]
+        },
+        {
+          role: 'assistant',
+          content: [{ type: 'text', text: 'Second response' }]
+        }
+      ]
+    })
+
+    // Act - render component with code and output
+    await act(async () => {
+      render(
+        <ConversationManager
+          conversationId={conversationId}
+          currentCode={currentCode}
+          stdout={stdout}
+          stderr={stderr}
+          outputIsStale={outputIsStale}
+        />
+      )
+    })
+
+    // Send first message - this should include code and output
+    const messageInput = screen.getByPlaceholderText('Type your message...')
+    await act(async () => {
+      await user.type(messageInput, 'First message')
+    })
+
+    const sendButton = screen.getByText('Send')
+    await act(async () => {
+      await user.click(sendButton)
+    })
+
+    // First call should send the code and output (since it's the first time)
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      conversationId,
+      'First message',
+      currentCode, // Code should be sent with first message
+      stdout, // The actual stdout value, not empty string
+      '' // Empty string instead of null for stderr
+    )
+
+    // Clear mock to prepare for second message
+    mockSendMessage.mockClear()
+
+    // Send second message without changing the code
+    await waitFor(() => {
+      expect(screen.getByText('First response')).toBeInTheDocument()
+    })
+
+    await act(async () => {
+      await user.type(
+        screen.getByPlaceholderText('Type your message...'),
+        'Second message'
+      )
+    })
+
+    await act(async () => {
+      await user.click(screen.getByText('Send'))
+    })
+
+    // Second call should not send code, stdout, or stderr since code hasn't changed
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      conversationId,
+      'Second message',
+      null, // Code should not be sent with second message since it hasn't changed
+      null, // Stdout not sent because code is null (unchanged)
+      null // Stderr not sent because code is null (unchanged)
+    )
+  })
+
+  /**
+   * Test case: stdout and stderr NOT sent when output is stale
+   *
+   * In this test, we check for the condition where frontend DOES send code but NOT
+   * stdout and stderr because the code hasn't been run yet, so whatever stdout and
+   * stderr are present are outdated.
+   */
+  it('should not send stdout and stderr when output is stale', async () => {
+    // Arrange
+    const user = userEvent.setup()
+    const conversationId = 1
+    const currentCode =
+      'print("Hello, I added new code because the old string only said "Hello"")'
+    const stdout = 'Hello'
+    const stderr = ''
+    const outputIsStale = true // Output is stale
+
+    mockFetchConversation.mockResolvedValue({
+      id: conversationId,
+      messages: []
+    })
+
+    mockSendMessage.mockResolvedValue({
+      id: conversationId,
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: 'Test message' }]
+        }
+      ]
+    })
+
+    // Act
+    await act(async () => {
+      render(
+        <ConversationManager
+          conversationId={conversationId}
+          currentCode={currentCode}
+          stdout={stdout}
+          stderr={stderr}
+          outputIsStale={outputIsStale}
+        />
+      )
+    })
+
+    // Enter a message and send it
+    const messageInput = screen.getByPlaceholderText('Type your message...')
+    await act(async () => {
+      await user.type(messageInput, 'Test message')
+    })
+
+    const sendButton = screen.getByText('Send')
+    await act(async () => {
+      await user.click(sendButton)
+    })
+
+    // Assert - should send message and code, but not stdout or stderr because output is stale
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      conversationId,
+      'Test message',
+      currentCode, // Should send code
+      null, // Should not send stdout
+      null // Should not send stderr
     )
   })
 })

@@ -1,6 +1,6 @@
 // src/components/App.tsx
 import { useState, useEffect } from 'react'
-import ConversationView from './ConversationView'
+import ConversationManager from './ConversationManager'
 import ConversationSelector from './ConversationSelector'
 import CodeEditor from './CodeEditor'
 import OutputDisplay from './OutputDisplay'
@@ -13,6 +13,7 @@ function App() {
   const [code, setCode] = useState(
     "# Write your Python code here\nprint('Hello, Playdo!')"
   )
+  const [outputIsStale, setOutputIsStale] = useState(true)
 
   // below function does code execution and populates outputs into result. Happens
   // on every component re-render. That way the OutputElement below can display
@@ -30,9 +31,15 @@ function App() {
     initialize()
   }, [initialize])
 
+  // Mark output as stale when code changes
+  useEffect(() => {
+    setOutputIsStale(true)
+  }, [code])
+
   const handleRunCode = async () => {
     try {
       await executeCode(code)
+      setOutputIsStale(false) // Mark output as fresh after running code
     } catch (error) {
       console.error('Failed to execute code:', error)
     }
@@ -74,14 +81,19 @@ function App() {
               <OutputDisplay
                 stdout={result?.stdout || ''}
                 stderr={result?.stderr || ''}
-                error={result?.error || null}
                 isCodeRunning={isCodeRunning}
                 isPyodideInitializing={isPyodideInitializing}
               />
             </div>
           </div>
           <div className="flex h-[60vh] flex-col">
-            <ConversationView conversationId={selectedConversationId} />
+            <ConversationManager
+              conversationId={selectedConversationId}
+              currentCode={code}
+              stdout={result?.stdout || null}
+              stderr={result?.stderr || null}
+              outputIsStale={outputIsStale}
+            />
           </div>
         </div>
       </div>
