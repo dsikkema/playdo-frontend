@@ -430,7 +430,7 @@ describe('<ConversationView />', () => {
         {
           role: 'user',
           content: [{ type: 'text', text: 'First message' }],
-          editorCode: currentCode
+          editor_code: currentCode
         },
         {
           role: 'assistant',
@@ -446,7 +446,7 @@ describe('<ConversationView />', () => {
         {
           role: 'user',
           content: [{ type: 'text', text: 'First message' }],
-          editorCode: currentCode
+          editor_code: currentCode
         },
         {
           role: 'assistant',

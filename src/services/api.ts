@@ -36,7 +36,7 @@ export async function fetchConversationIds(): Promise<number[]> {
 export async function sendMessage(
   conversationId: number,
   message: string,
-  editorCode: string | null = null,
+  editor_code: string | null = null,
   stdout: string | null = null,
   stderr: string | null = null
 ): Promise<Conversation> {
@@ -50,7 +50,7 @@ export async function sendMessage(
         },
         body: JSON.stringify({
           message,
-          editor_code: editorCode,
+          editor_code,
           stdout,
           stderr
         })

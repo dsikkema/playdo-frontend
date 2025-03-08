@@ -50,6 +50,7 @@ function ConversationManager({
         setLoading(true)
         const data = await fetchConversation(conversationId)
         setConversation(data)
+        console.log(`conversation: ${JSON.stringify(data)}`)
         setError(null)
       } catch (err) {
         setError('Failed to load conversation. Please try again later.')
