@@ -41,7 +41,7 @@ function Message({ message }: MessageProps) {
     <div className="flex w-full">
       <div
         className={classNames(
-          'max-w-[75%] rounded-lg p-4 mb-4',
+          'max-w-[90%] rounded-lg p-4 mb-4',
           // Use flex positioning instead of margin for alignment
           isUser
             ? 'ml-auto mr-0 bg-blue-100 text-blue-800'
@@ -51,7 +51,10 @@ function Message({ message }: MessageProps) {
         <div className="mb-1 text-sm font-medium">
           {isUser ? 'You' : 'Assistant'}
         </div>
-        <div className="prose prose-slate max-w-none">
+        <div
+          className="prose prose-slate max-w-none"
+          style={{ fontFamily: 'Georgia, serif' }}
+        >
           <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
         </div>
       </div>

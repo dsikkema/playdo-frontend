@@ -50,11 +50,11 @@ describe('<ConversationSelector />', () => {
     })
 
     // Assert
-    expect(screen.getByText('Select a conversation:')).toBeInTheDocument()
+    expect(screen.getByText('Select conversation:')).toBeInTheDocument()
     expect(screen.getByText('New Conversation')).toBeInTheDocument()
 
     // Check that the select dropdown has the placeholder option
-    expect(screen.getByText('-- Select a conversation --')).toBeInTheDocument()
+    expect(screen.getByText('-- Select --')).toBeInTheDocument()
 
     // Wait for data to load
     await waitFor(() => {
