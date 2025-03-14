@@ -5,14 +5,18 @@ import App from './App'
 import usePythonExecution from '../hooks/usePythonExecution'
 import { PyodideStatus } from '../services/pyodide'
 
+// Set up the mock for AuthContext
+const mockLogout = vi.fn()
+const mockUseAuth = vi.fn(() => ({
+  isAuthenticated: true,
+  token: 'mock-token',
+  login: vi.fn(),
+  logout: mockLogout
+}))
+
 // Mock the useAuth hook
 vi.mock('../context/AuthContext', () => ({
-  useAuth: vi.fn(() => ({
-    isAuthenticated: true,
-    token: 'mock-token',
-    login: vi.fn(),
-    logout: vi.fn()
-  }))
+  useAuth: () => mockUseAuth()
 }))
 
 // Note: deleted previous implementation that mocked api out, because App doesn't directly use api,
@@ -161,9 +165,9 @@ describe('<App />', () => {
 
   it('should render the login screen when not authenticated', () => {
     // Mock unauthenticated state
-    vi.mocked(require('../context/AuthContext').useAuth).mockReturnValueOnce({
+    mockUseAuth.mockReturnValueOnce({
       isAuthenticated: false,
-      token: null,
+      token: '', // Empty string instead of null
       login: vi.fn(),
       logout: vi.fn()
     })
@@ -173,12 +177,14 @@ describe('<App />', () => {
 
     // Assert
     expect(screen.getByTestId('mock-login')).toBeInTheDocument()
-    expect(screen.queryByTestId('mock-conversation-selector')).not.toBeInTheDocument()
+    expect(
+      screen.queryByTestId('mock-conversation-selector')
+    ).not.toBeInTheDocument()
   })
 
   it('should render the main components correctly when authenticated', () => {
     // Mock authenticated state
-    vi.mocked(require('../context/AuthContext').useAuth).mockReturnValueOnce({
+    mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
       token: 'mock-token',
       login: vi.fn(),
@@ -196,7 +202,7 @@ describe('<App />', () => {
 
   it('should render the run button when authenticated', () => {
     // Mock authenticated state
-    vi.mocked(require('../context/AuthContext').useAuth).mockReturnValueOnce({
+    mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
       token: 'mock-token',
       login: vi.fn(),
@@ -212,7 +218,7 @@ describe('<App />', () => {
 
   it('should render the OutputDisplay component when authenticated', () => {
     // Mock authenticated state
-    vi.mocked(require('../context/AuthContext').useAuth).mockReturnValueOnce({
+    mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
       token: 'mock-token',
       login: vi.fn(),
@@ -228,7 +234,7 @@ describe('<App />', () => {
 
   it('should execute code when the run button is clicked', async () => {
     // Mock authenticated state
-    vi.mocked(require('../context/AuthContext').useAuth).mockReturnValueOnce({
+    mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
       token: 'mock-token',
       login: vi.fn(),
@@ -252,7 +258,7 @@ describe('<App />', () => {
 
   it('should initialize Pyodide on component mount when authenticated', async () => {
     // Mock authenticated state
-    vi.mocked(require('../context/AuthContext').useAuth).mockReturnValueOnce({
+    mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
       token: 'mock-token',
       login: vi.fn(),
@@ -282,7 +288,7 @@ describe('<App />', () => {
 
   it('should handle Python execution errors gracefully', async () => {
     // Mock authenticated state
-    vi.mocked(require('../context/AuthContext').useAuth).mockReturnValueOnce({
+    mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
       token: 'mock-token',
       login: vi.fn(),
@@ -328,7 +334,7 @@ describe('<App />', () => {
 
   it('should pass execution result to OutputDisplay after running code', async () => {
     // Mock authenticated state
-    vi.mocked(require('../context/AuthContext').useAuth).mockReturnValueOnce({
+    mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
       token: 'mock-token',
       login: vi.fn(),
@@ -344,6 +350,8 @@ describe('<App />', () => {
     await user.click(runButton)
 
     // Assert - verify that the result is displayed
-    expect(screen.getByTestId('mock-stdout')).toHaveTextContent('Execution output')
+    expect(screen.getByTestId('mock-stdout')).toHaveTextContent(
+      'Execution output'
+    )
   })
 })

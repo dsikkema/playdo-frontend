@@ -1,4 +1,10 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react'
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  ReactNode
+} from 'react'
 
 type AuthContextType = {
   token: string | null
@@ -11,7 +17,9 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 const TOKEN_STORAGE_KEY = 'playdo_auth_token'
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children
+}) => {
   const [token, setToken] = useState<string | null>(null)
 
   // On mount, check for existing token in localStorage
@@ -48,4 +56,4 @@ export const useAuth = (): AuthContextType => {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
-} 
+}

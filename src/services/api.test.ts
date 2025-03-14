@@ -43,7 +43,7 @@ const defaultHeaders = {
 // Headers with auth token
 const authHeaders = {
   'Content-Type': 'application/json',
-  'Authorization': 'Bearer test-token'
+  Authorization: 'Bearer test-token'
 }
 
 // Rewrite the tests to use the real API functions
@@ -83,7 +83,7 @@ describe('API Service', () => {
     it('includes auth token in headers when available', async () => {
       // Setup mock response with auth token
       mockLocalStorage.getItem.mockReturnValueOnce('test-token')
-      
+
       const mockConversation: Conversation = {
         id: 1,
         created_at: '2023-01-01T00:00:00Z',

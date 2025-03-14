@@ -11,20 +11,23 @@ const createHeaders = (contentType = 'application/json'): HeadersInit => {
   const headers: HeadersInit = {
     'Content-Type': contentType
   }
-  
+
   const token = getAuthToken()
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
-  
+
   return headers
 }
 
 export async function fetchConversation(id: number): Promise<Conversation> {
   try {
-    const response = await fetch(`${config.backendUrl}/api/conversations/${id}`, {
-      headers: createHeaders()
-    })
+    const response = await fetch(
+      `${config.backendUrl}/api/conversations/${id}`,
+      {
+        headers: createHeaders()
+      }
+    )
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`)

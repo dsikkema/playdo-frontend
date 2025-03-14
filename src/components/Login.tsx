@@ -25,13 +25,17 @@ const Login: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Login failed. Please check your credentials.')
+        throw new Error(
+          errorData.message || 'Login failed. Please check your credentials.'
+        )
       }
 
       const data = await response.json()
       login(data.access_token)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred')
+      setError(
+        err instanceof Error ? err.message : 'An unexpected error occurred'
+      )
     } finally {
       setIsLoading(false)
     }
@@ -41,10 +45,14 @@ const Login: React.FC = () => {
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div>
-          <h1 className="mt-6 text-center text-3xl font-extrabold text-green-600">Playdo</h1>
-          <h2 className="mt-2 text-center text-xl text-gray-600">Sign in to your account</h2>
+          <h1 className="mt-6 text-center text-3xl font-extrabold text-green-600">
+            Playdo
+          </h1>
+          <h2 className="mt-2 text-center text-xl text-gray-600">
+            Sign in to your account
+          </h2>
         </div>
-        
+
         {error && (
           <div className="rounded-md bg-red-50 p-4">
             <div className="flex">
@@ -68,7 +76,7 @@ const Login: React.FC = () => {
                 type="text"
                 autoComplete="username"
                 required
-                className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
+                className="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -84,7 +92,7 @@ const Login: React.FC = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
+                className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -107,4 +115,4 @@ const Login: React.FC = () => {
   )
 }
 
-export default Login 
+export default Login

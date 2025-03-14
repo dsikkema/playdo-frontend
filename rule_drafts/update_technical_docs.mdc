@@ -1,6 +1,6 @@
 ---
 description: Update TECHNICAL_NOTES.md After any large Changes
-globs: 
+globs:
 alwaysApply: true
 ---
 # Update Technical Documentation After Changes
@@ -53,12 +53,12 @@ interface UserProfileProps {
 
 export const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
   const [userData, setUserData] = useState<User | null>(null);
-  
+
   useEffect(() => {
     // Implementation
     fetchUserData(userId).then(data => setUserData(data));
   }, [userId]);
-  
+
   // Component rendering logic
   // ...
 };

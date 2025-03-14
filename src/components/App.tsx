@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import usePythonExecution from '../hooks/usePythonExecution'
 
 function App() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, logout } = useAuth()
   const [selectedConversationId, setSelectedConversationId] = useState<
     number | null
   >(null)
@@ -74,11 +74,11 @@ function App() {
                 selectedConversationId={selectedConversationId}
               />
             </div>
-            
+
             {/* Right - Logout button */}
             <div className="absolute right-4">
-              <button 
-                onClick={() => useAuth().logout()}
+              <button
+                onClick={logout}
                 className="text-sm text-gray-600 hover:text-gray-900"
               >
                 Sign out

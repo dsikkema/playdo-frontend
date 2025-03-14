@@ -43,10 +43,10 @@ describe('userService', () => {
       ok: true,
       json: async () => mockUser
     });
-    
+
     // Act: Call the service
     const result = await fetchUserData('123');
-    
+
     // Assert: Verify expected behavior
     expect(global.fetch).toHaveBeenCalledWith('/api/users/123');
     expect(result).toEqual(mockUser);
@@ -76,12 +76,12 @@ describe('<UserProfile />', () => {
   it('displays user data after loading', async () => {
     // Arrange
     const user = userEvent.setup();
-    
+
     // Act: Render component
     await act(async () => {
       render(<UserProfile userId="123" />);
     });
-    
+
     // Assert: Verify data is displayed
     expect(screen.getByText('Test User')).toBeInTheDocument();
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
@@ -121,13 +121,13 @@ When tests fail, DO NOT:
      await act(async () => {
        render(<InputForm />);
      });
-     
+
      const input = screen.getByRole('textbox');
      await userEvent.type(input, 'test value');
-     
+
      // Add temporary debug logging
      console.log('DEBUG:', screen.debug()); // Shows the rendered DOM
-     
+
      expect(screen.getByText('Processed: test value')).toBeInTheDocument();
    });
    ```
