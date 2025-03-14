@@ -1,0 +1,26 @@
+---
+description: Writing Effective Cursor Rules
+globs: *.mdc
+alwaysApply: false
+---
+# Writing Effective Cursor Rules
+
+## Best Practices
+
+- Describe the conditions and situations for _when_ the rule is applicable.
+- Provide clear examples of good and bad practices
+- Explain **why** rules matter to improve adoption
+- Use concise, structured formatting for readability
+- Be explicit about critical requirements with emphasis
+- Keep rules brief and to the point
+- Use terms like "MUST", "NEVER", and "ALWAYS" for critical items: forceful language for important parts.
+  This helps the AI "pay attention" to what it needs to.
+- Highlight important sections with **bold text** or `code formatting`
+
+## Rule Structure
+
+1. Start with a clear, descriptive title
+2. Explain the purpose and context
+3. Provide concrete examples
+4. Use clear section headings
+5. Include both what to do and what to avoid

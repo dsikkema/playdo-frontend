@@ -1,17 +1,23 @@
 ---
-description: HOW to approach fixing bugs or incorrect behavior
-globs: *.ts, *.tsx
+description: Bug Fixing Workflow
+globs:
 alwaysApply: true
 ---
+# Bug Fixing Workflow
 
-# IF there is a bug that the user is telling you about then do this:
+When addressing a bug:
 
-- Think out loud about why existing tests did not ALREADY prevent the bug from being introduced. Existing tests SHOULD HAVE
-  caught the bug and SHOULD fail because of it.
-- Write a new test case that exercises the condition necessary to surface the bug. START with the failing test and then
-  try to fix the code, and then the test you wrote should pass.
+1. **Analyze Existing Tests**
+   - Consider why existing tests didn't catch the bug
+   - Review what test cases should have prevented the issue
 
-  As an important reminder: WRITE TESTS to surface the bug BEFORE writing a fix. If this test is skipped, there's a possibility
-  that the test you write afterwards could be unwittingly tailored to the fix-implementation and not actually fix the bug.
+2. **Create a Failing Test First**
+   - Write a test that reproduces the bug
+   - Run the test to confirm it fails due to the bug
+   - This test should pass once the fix is implemented
 
-  NOTE: it is MANDATORY to write unit tests BEFORE fixing the bug. Run them, expect them to fail, then fix the application code.
+3. **Fix the Code**
+   - Only after creating a failing test, fix the application code
+   - Run the test to verify your fix works
+
+> **IMPORTANT**: It is MANDATORY to write tests BEFORE fixing the bug. This prevents creating tests that are tailored to your specific implementation rather than the correct behavior.

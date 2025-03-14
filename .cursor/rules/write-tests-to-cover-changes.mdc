@@ -1,32 +1,33 @@
 ---
-description: ALWAYS write Vitest tests for code changes
-globs: *.tsx,*.ts
+description: Writing Tests for Code Changes
+globs:
 alwaysApply: true
 ---
-# Frontend Tests
+# Writing Tests for Code Changes
 
-## When to write new tests, new test cases, or update existing test cases
-When adding components, fixing bugs, or making any changes, ALWAYS write automated tests with Vitest that logically cover the change. Run tests to verify they pass using `npm run test`.
+## Test Coverage Requirements
 
-Test files should follow the naming convention:
-- `ComponentName.test.tsx` for component tests
-- `fileName.test.ts` for utility/service tests
+- **Always** write Vitest tests for new components, bug fixes, and feature changes
+- A bug is NOT fixed until a test proves it's fixed
+- Run tests with `npm run test` to verify they pass
 
-A bug is NOT fixed until a test proves that it's fixed, that would have failed without fixing the bug.
+## Test File Naming
 
-## What to test
-- Components: Test rendering, user interactions, and component state changes
-- Services: Test API calls, data transformation, and error handling
-- Utilities: Test pure functions and their edge cases
-- Hooks: Test custom hooks with `@testing-library/react-hooks`
+- Component tests: `ComponentName.test.tsx`
+- Utility/service tests: `fileName.test.ts`
 
-## Test case design
-- DO NOT mock the same component multiple times. Check if there is already a mock of the component before adding a
-  new mock. Multiple mocks of the same component can cause tests to behave incorrectly and not spot bugs.
-- Tests should be COMPREHENSIVE and cover edge cases, not just the happy path.
-- When there are a variable number of inputs or outputs (such as a list that may contain multiple messages, multiple
-  users, a map with many key/value pairs, or etcetera), ALWAYS test the cases of zero, one, and many items. Test
-  when the input or result is empty that the expected behavior occurs (even if a validation error is the expected
-  result), and the same when there is only one item, or many items.
-- Think out loud about the possible edge cases, as they relate to null/empty conditions, the boundaries of loops, and
-  the cyclomatic structure of the code being tested. Then write tests for any edge cases you can observe.
+## What to Test
+
+- **Components**: Rendering, user interactions, state changes
+- **Services**: API calls, data transformation, error handling
+- **Utilities**: Pure functions and edge cases
+- **Hooks**: Custom hooks with @testing-library/react-hooks
+
+## Test Case Design
+
+- NEVER mock the component being tested
+- AVOID multiple mocks of the same component in different tests
+- Tests should be COMPREHENSIVE, covering edge cases
+- For collections/lists, test zero, one, and many items
+- Consider boundary conditions, null/empty values, and error states
+- Think through cyclomatic complexity when designing test cases

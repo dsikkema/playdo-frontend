@@ -1,19 +1,18 @@
 ---
-description: ALWAYS use proper TypeScrypt annotations
-globs: *.tsx,*.ts
-alwaysApply: true
+description: ALWAYS Use Proper TypeScript Typing
+globs: *.tsx, *.ts
+alwaysApply: false
 ---
+# ALWAYS Use Proper TypeScript Typing
 
-# ALWAYS use proper TypeScript typing
+When writing code, ensure:
+- All parameters and props are properly typed
+- Return values are typed
+- Use interfaces or type aliases for complex structures
+- Use union types with null/undefined instead of any
+- Nullable values should be typed as `Type | null` or `Type | undefined`
 
-When writing functions, components, or declaring variables:
-[ ] Make sure parameters and props are properly typed
-[ ] Make sure return values are typed
-[ ] Use appropriate interfaces or type aliases for complex structures
-[ ] Use union types with null/undefined instead of any
-[ ] Nullable values should be typed as Type | null or Type | undefined
-
-React component example:
+## Example
 ```tsx
 interface UserProfileProps {
   username: string;
