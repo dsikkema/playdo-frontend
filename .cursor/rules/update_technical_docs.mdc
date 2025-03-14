@@ -3,11 +3,6 @@ description: Update TECHNICAL_NOTES.md After any large Changes
 globs:
 alwaysApply: true
 ---
----
-description: Update TECHNICAL_NOTES.md After any large Changes
-globs:
-alwaysApply: true
----
 # Update Technical Documentation After Changes
 **AppliesavaScript files, package.json, component structure
 
