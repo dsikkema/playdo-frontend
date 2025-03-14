@@ -77,6 +77,7 @@ describe('Login', () => {
     // Mock failed fetch response
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
+      status: 401,
       json: async () => ({ message: 'Invalid credentials' })
     } as Response)
 
@@ -95,7 +96,7 @@ describe('Login', () => {
 
     // Check if error message is displayed
     await waitFor(() => {
-      expect(screen.getByText('Invalid credentials')).toBeInTheDocument()
+      expect(screen.getByText(/Login failed/)).toBeInTheDocument()
     })
 
     // Check login function was not called

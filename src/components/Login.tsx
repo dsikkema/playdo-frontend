@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { config } from '../config'
 
@@ -7,13 +7,42 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [loginFailed, setLoginFailed] = useState(false)
+  /**
+   * The point of useRef is to be a stable "container" around the DOM element. It's inited to null (because I'm passing null
+   * here) but on render, usernameRef.current will point to the DOM element itself. The connection comes in JSX code below
+   * where the username element has ref={usernameRef}.
+   *
+   * This ref always has only one property: `.current`
+   *
+   * On re-renders, "magic happens" in react land. React actually keeps the same DOM elements there in the browser, even if
+   * the React component re-rendered, and even if the DOMelement's prop's changed. If the element is removed, or if a whole
+   * new element gets attached to this ref with ref={usernameRef}, then the .current will be nulled or updated respectively.
+   */
+  const usernameRef = useRef<HTMLInputElement>(null)
   const { login } = useAuth()
+
+  useEffect(() => {
+    if (loginFailed) {
+      setUsername('')
+      setPassword('')
+      usernameRef.current?.focus()
+    }
+  }, [loginFailed])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    /**
+     * Quick reminder: calling hooks like useState inside conditions (not in the same order each time) is the problem, but
+     * calling the _setters_ that are _returned by_ the hooks is fine in an out-of-order or conditional way.
+     */
+    setLoginFailed(false)
     setIsLoading(true)
 
+    /**
+     * Note: it's unnecessary to check for empty username/pwd here because they have 'required' prop set in the jsx
+     */
     try {
       const response = await fetch(`${config.backendUrl}/api/login`, {
         method: 'POST',
@@ -23,11 +52,13 @@ const Login: React.FC = () => {
         body: JSON.stringify({ username, password })
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(
-          errorData.message || 'Login failed. Please check your credentials.'
-        )
+      if (response.status === 401) {
+        setLoginFailed(true)
+        setError('Invalid username or password')
+        setIsLoading(false)
+        throw new Error('Login failed. Please check your credentials.')
+      } else if (!response.ok) {
+        throw new Error('An unexpected error occurred')
       }
 
       const data = await response.json()
@@ -72,6 +103,7 @@ const Login: React.FC = () => {
               </label>
               <input
                 id="username"
+                ref={usernameRef}
                 name="username"
                 type="text"
                 autoComplete="username"
