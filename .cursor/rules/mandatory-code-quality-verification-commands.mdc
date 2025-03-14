@@ -1,34 +1,42 @@
 ---
-description: ALWAYS Run tests, linters, and typechecker
-globs: *.tsx,*.ts,*.jsx,*.js
+description:
+globs:
 alwaysApply: true
 ---
 # Mandatory Verification Steps
 
-After ANY code changes, the AI MUST:
+After ANY code changes, you MUST run these commands in this order:
 
-1. **Run Tests First**:
-   - ALWAYS run `npm run test` to verify tests pass - do this first.
+1. **Run Tests First**
+   ```bash
+   npm run test
+   ```
 
-2. **Run Linters and Type Checking AUTOMATICALLY**:
-   - ALWAYS run `npm run typecheck` to verify type correctness - do this BEFORE linters.
-   - ALWAYS use `npm run prettier` to fix formatting issues (this command updates files to fix them)
-    - Do this BEFORE running lint
-   - ALWAYS run `npm run lint` to verify good formatting (this may also write updates to fix them).
+2. **Run Type Checking**
+   ```bash
+   npm run typecheck
+   ```
 
-3. **Verification Checkpoints**:
-   - The AI MUST NOT consider a task complete until ALL linting and type checking passes
-   - The AI MUST show the output of these commands to confirm compliance
-   - If any errors remain, the AI MUST fix them before proceeding
+3. **Run Code Formatting**
+   ```bash
+   npm run prettier
+   ```
 
-4. **Test Verification**:
-   - ALWAYS run `npm run test` after code changes
-   - ALL tests must pass before considering the task complete
+4. **Run Linting**
+   ```bash
+   npm run lint
+   ```
 
-5. **Explicit Confirmation**:
-   - The AI MUST explicitly confirm that it has run these checks
-   - The AI MUST include the command outputs in its response
+5. **Run Tests Again**
+   ```bash
+   npm run test
+   ```
 
-Failure to follow these steps is considered an incomplete response.
+## Critical Requirements
 
-Summary: Tests, Linters, Typechecking are MANDATORY and MUST be run AUTOMATICALLY and this is VERY IMPORTANT.
+- **No Exceptions**: ALL checks MUST pass
+- **Visible Results**: Show command outputs in responses
+- **Fix All Issues**: Address any errors before proceeding
+- **Complete Verification**: A task is NOT complete until all checks pass
+
+> **IMPORTANT**: These verification steps are MANDATORY and MUST be run AUTOMATICALLY after any code changes.

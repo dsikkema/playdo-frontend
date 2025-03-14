@@ -1,0 +1,82 @@
+---
+description: Update TECHNICAL_NOTES.md After any large Changes
+globs:
+alwaysApply: true
+---
+---
+description: Update TECHNICAL_NOTES.md After any large Changes
+globs:
+alwaysApply: true
+---
+# Update Technical Documentation After Changes
+**AppliesavaScript files, package.json, component structure
+
+## When to Update Documentation
+You MUST update [TECHNICAL_NOTES.md](mdc:TECHNICAL_NOTES.md) after making substantive changes to the application.
+
+## Why
+That document is used to provide information to developers in the future. If there are significant changes to components or app logic
+that are not reflected in that document, then developers will be confused about how the code actually works.
+
+## Changes Requiring Documentation Updates
+1. **New Components**
+   - Add to "Core Components" section
+   - Describe purpose and integration with existing components
+
+2. **Modified Application Structure**
+   - Update "File Structure" section
+   - Update "Component Hierarchy" if architecture changed
+
+3. **Changes to Data Flow**
+   - Update "Data Flow" section
+   - Document new API endpoints, state management updates, or data transformations
+
+4. **New Dependencies**
+   - Add to "Technical Dependencies" section
+   - Include purpose and integration method
+   - Note any version requirements or configuration needs
+
+## Documentation Update Process
+1. Review current documentation structure
+2. Identify sections needing updates
+3. Maintain consistent formatting and detail level
+4. Keep updates concise and focused on architectural impact
+5. When in doubt, include the documentation
+
+## Example
+```
+# Before: Missing documentation for new component
+
+# New file: src/components/UserProfile.tsx
+import React, { useState, useEffect } from 'react';
+import { User } from '../types';
+import { fetchUserData } from '../services/userService';
+
+interface UserProfileProps {
+  userId: string;
+}
+
+export const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
+  const [userData, setUserData] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Implementation
+    fetchUserData(userId).then(data => setUserData(data));
+  }, [userId]);
+
+  // Component rendering logic
+  // ...
+};
+
+# After: With proper documentation updates
+# In TECHNICAL_NOTES.md, Core Components section:
+
+7. **UserProfile** - Displays and manages user data and preferences.
+   Connected to the user service for data fetching and updates.
+
+# And in Component Hierarchy section:
+
+- **UserProfile** - Renders user information and preferences.
+  - Props: `userId: string`
+  - State: Local state for user data
+  - Dependencies: userService for API interactions

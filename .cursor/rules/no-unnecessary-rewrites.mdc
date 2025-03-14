@@ -1,0 +1,36 @@
+---
+description: Prevent unnecessary stylistic or content changes to existing code
+globs: *
+alwaysApply: true
+---
+
+# NEVER Make Unnecessary Changes to Working Code
+**Applies to:** All code files
+
+## WHY This Rule Matters
+Unnecessary changes to working code:
+- Break existing tests that depend on specific messages or structure
+- Remove context other developers rely on
+- Risk introducing subtle bugs
+- Create unnecessary code churn
+
+## What You MUST Preserve
+When modifying existing code, you MUST:
+- **KEEP all existing code comments**, especially explanatory ones
+- **PRESERVE error and validation messages** exactly as they are
+- **MAINTAIN existing code structure** when it already works
+- **RETAIN variable/function names** unless refactoring is explicitly required
+
+## Acceptable Changes ONLY
+You may ONLY change existing working code for:
+- Functional requirements that explicitly demand the change
+- Meaningful refactoring with clear benefits
+- Changes that are being requested or made INTENTIONALLY
+- Fixing actual bugs or security issues
+- Changes specifically requested by the user
+
+## NEVER Change Code Based Only On
+- Personal style preferences
+- Subjective "improvements" without concrete benefits
+- Making code more concise without functional reason
+- Different but equivalent ways of doing the same thing

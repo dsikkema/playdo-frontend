@@ -1,0 +1,107 @@
+---
+description: Comprehensive, Thoughtful, Written Planning Before Coding
+globs:
+alwaysApply: true
+---
+
+# MANDATORY Comprehensive, Thoughtful, Written Planning Before Coding
+**Applies to:** All code files
+
+## ALWAYS Research Before Planning
+Before suggesting ANY code changes, you MUST:
+
+1. **Gather complete context** using appropriate tools:
+   ```
+   - Read relevant files completely
+   - List directories to understand project structure
+   - Use code search to find related components
+   - Examine existing tests thoroughly
+   ```
+
+2. **NEVER skip research** even if you think you understand the task
+
+## Create a Detailed Plan of Action
+After research, ALWAYS think carefully about, and WRITE OUT a comprehensive plan that includes:
+
+1. **External Library/Component Usage**
+   - Document the correct API calls and patterns
+   - Note common pitfalls and how to avoid them
+   - Example:
+     ```python
+     # CORRECT library usage:
+     from sqlalchemy.orm import Session
+
+     def get_user(session: Session, user_id: int):
+         return session.query(User).filter(User.id == user_id).first()
+     ```
+
+2. **Architectural/Structural Changes**
+   - Identify components affected by changes
+   - Describe how data will flow through modified architecture
+
+3. **Modifications to Existing Components**
+   - List all functions/methods requiring changes
+   - Identify potential side effects
+
+4. **New Component Additions**
+   - Detail responsibilities of new components
+   - Describe interfaces with existing code
+
+5. **Test Changes (REQUIRED)**
+   - PROACTIVELY Identify test files and test cases needing updates
+   - Plan for new tests to cover added functionality
+   - Consider edge cases and failure modes
+   - It is EXTREMELY important to look at existing tests and think about how they will need to be updated
+     during the planning phase, so that tests are NOT an afterthought, after code has been written and they
+     need to be fixed.
+
+6. **Relationship Between Code and Test Changes**
+   - For each code change, identify corresponding test changes
+   - Describe how tests will verify correct behavior
+   - Plan test-first approach where appropriate
+
+## Example Plan
+The following is just an example
+<examplePlan>
+```
+## Comprehensive Plan: Add User Authentication
+
+### Research Completed:
+- Examined auth.py, user.py, and related components
+- Reviewed 8 existing test files in tests/auth/
+- Verified current JWT library usage patterns
+
+### External Libraries:
+- Will use PyJWT 2.4.0 with the following pattern:
+  ```python
+  # Encode with required claims and expiration
+  token = jwt.encode({"sub": user_id, "exp": datetime.now() + timedelta(hours=1)},
+                    SECRET_KEY, algorithm="HS256")
+  ```
+
+### Architectural Changes:
+- Adding AuthMiddleware in middleware/auth.py
+- Modifying request flow to verify tokens before handlers
+
+### Component Modifications:
+- Update user.py: add password hashing and verification
+- Modify auth.py: add token validation
+- Move token generation from user.py to auth.py
+
+### New Components:
+- Create middleware/auth.py with JWT verification
+
+### Test Changes:
+- Update tests/auth/test_login.py with new token format
+- Create tests/middleware/test_auth_middleware.py
+- Add test cases for token expiration, invalid tokens
+- Update fixtures for test_client creation so the client is authorized
+- Add new user fixture to add a new user to the database
+- Because token generation functionality was moved from user.py to auth.py, test_generation needs to be moved from test_user.py to test_auth.py
+
+### Test-Code Relationship:
+- For user password changes, test both hashing and verification
+- For AuthMiddleware, test both valid and invalid token scenarios
+- Test integration between middleware and auth handlers
+```
+</examplPlan>
