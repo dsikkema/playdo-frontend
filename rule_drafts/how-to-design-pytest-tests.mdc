@@ -1,0 +1,172 @@
+---
+description: How to Design Vitest Tests
+globs:
+alwaysApply: true
+---
+# How to Design Vitest Tests
+**Applies to:** Test files (*.test.tsx, *.test.ts)
+
+## Test States Thoroughly
+- Test initial/empty states and non-empty states
+- Test with zero, one, and multiple items when applicable
+- Use test.each for multiple test cases:
+
+```tsx
+import { describe, it, expect, test } from 'vitest';
+
+test.each([
+  { a: [1, 3], b: [2, 4], expected: [1, 2, 3, 4] },
+  { a: [], b: [1, 3], expected: [1, 3] },
+  { a: [1, 3], b: [], expected: [1, 3] }
+])('merge($a, $b) should return $expected', ({ a, b, expected }) => {
+  expect(merge(a, b)).toEqual(expected);
+});
+```
+
+## API Service Testing
+For services connecting to APIs:
+- Mock fetch/axios responses
+- Test with complete request-response cycles:
+
+```tsx
+import { vi, describe, it, expect } from 'vitest';
+import { fetchUserData } from './userService';
+
+// Mock global fetch
+global.fetch = vi.fn();
+
+describe('userService', () => {
+  it('fetches and transforms user data correctly', async () => {
+    // Arrange: Setup mock response
+    const mockUser = { id: '123', name: 'Test User' };
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockUser
+    });
+    
+    // Act: Call the service
+    const result = await fetchUserData('123');
+    
+    // Assert: Verify expected behavior
+    expect(global.fetch).toHaveBeenCalledWith('/api/users/123');
+    expect(result).toEqual(mockUser);
+  });
+});
+```
+
+## Component Testing
+For React components:
+- Use Testing Library to render and interact with components
+- Mock child components to isolate functionality
+- Always wrap render and state changes in act()
+
+```tsx
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { act } from 'react';
+import UserProfile from './UserProfile';
+
+// Mock the userService
+vi.mock('../services/userService', () => ({
+  fetchUserData: vi.fn().mockResolvedValue({ name: 'Test User', email: 'test@example.com' })
+}));
+
+describe('<UserProfile />', () => {
+  it('displays user data after loading', async () => {
+    // Arrange
+    const user = userEvent.setup();
+    
+    // Act: Render component
+    await act(async () => {
+      render(<UserProfile userId="123" />);
+    });
+    
+    // Assert: Verify data is displayed
+    expect(screen.getByText('Test User')).toBeInTheDocument();
+    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+  });
+});
+```
+
+## KEEP TESTS SIMPLE
+- Tests MUST have minimal, essential assertions
+- Avoid overcomplicated mocking
+- Tests should be easy to understand and maintain
+
+## AVOID TEST FLAILING AND ARTIFICIAL COMPLEXITY
+When tests fail, DO NOT:
+- Keep adding complexity to tests to make them pass
+- Add conditional logic to components that only exists to satisfy tests
+- Add props to components that are only used in tests
+- Make more than 2-3 attempts to fix a test with the same approach
+
+### Signs of Flailing:
+- Adding multiple conditions to component code to handle test edge cases
+- Test setup grows increasingly complex
+- Making unrelated changes in hope they might fix the issue
+- Adding more mocks without understanding why they're needed
+
+### What to do when a test has failed multiple times in a row
+- Splash cold water in your face (metaphorically), and back up to understand the faulty assumptions that are being made
+- Assume that you have a basic misunderstanding of a certain library or technique, and hand control back to the user
+- ASK THE USER FOR HELP
+
+### CORRECT Approach to Failing Tests:
+
+1. **ALWAYS first diagnose the actual issue**:
+   ```tsx
+   // Add debugging to print intermediate values
+   it('should process user input correctly', async () => {
+     await act(async () => {
+       render(<InputForm />);
+     });
+     
+     const input = screen.getByRole('textbox');
+     await userEvent.type(input, 'test value');
+     
+     // Add temporary debug logging
+     console.log('DEBUG:', screen.debug()); // Shows the rendered DOM
+     
+     expect(screen.getByText('Processed: test value')).toBeInTheDocument();
+   });
+   ```
+
+2. **Fix the root cause, not the symptom**:
+   ```tsx
+   // BAD - Adding conditional just to make test pass
+   function processInput(value: string): string {
+     if (value === 'test value') {  // <-- Artificial test-only condition
+       return 'Processed: test value';
+     }
+     // Normal processing...
+   }
+
+   // GOOD - Fix the actual logic issue
+   function processInput(value: string): string {
+     // Logic that correctly handles all valid inputs
+     // including the test case naturally
+     return `Processed: ${value}`;
+   }
+   ```
+
+3. **If stuck after 2-3 attempts: STOP and reconsider the approach**
+   - Re-examine test expectations - are they correct?
+   - Consider if the component has a fundamental design flaw
+   - Ask for clarification rather than adding complexity
+
+4. **Sometimes the issue is in test expectations, not the code:**
+   ```tsx
+   // BAD - Complex test forcing a specific implementation
+   it('should have the correct internal structure', () => {
+     const { result } = renderHook(() => useMyHook());
+     expect(result.current.internalState.nestedProperty[0].value).toBe('specific value');
+   });
+
+   // GOOD - Test focused on behavior not implementation
+   it('should provide the expected functionality', () => {
+     const { result } = renderHook(() => useMyHook());
+     expect(result.current.getData('test')).toBe('expected result');
+     expect(result.current.isValid()).toBe(true);
+   });
+   ```
