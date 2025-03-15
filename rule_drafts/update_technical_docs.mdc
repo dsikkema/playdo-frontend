@@ -4,7 +4,7 @@ globs:
 alwaysApply: true
 ---
 # Update Technical Documentation After Changes
-**AppliesavaScript files, package.json, component structure
+**Applies to:** TypeScript/JavaScript files, package.json, component structure
 
 ## When to Update Documentation
 You MUST update [TECHNICAL_NOTES.md](mdc:TECHNICAL_NOTES.md) after making substantive changes to the application.

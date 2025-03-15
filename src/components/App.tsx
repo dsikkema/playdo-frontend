@@ -4,9 +4,12 @@ import ConversationManager from './ConversationManager'
 import ConversationSelector from './ConversationSelector'
 import CodeEditor from './CodeEditor'
 import OutputDisplay from './OutputDisplay'
+import Login from './Login'
+import { useAuth } from '../context/AuthContext'
 import usePythonExecution from '../hooks/usePythonExecution'
 
 function App() {
+  const { isAuthenticated, logout } = useAuth()
   const [selectedConversationId, setSelectedConversationId] = useState<
     number | null
   >(null)
@@ -28,8 +31,10 @@ function App() {
 
   // Initialize Pyodide on component mount
   useEffect(() => {
-    initialize()
-  }, [initialize])
+    if (isAuthenticated) {
+      initialize()
+    }
+  }, [initialize, isAuthenticated])
 
   // Mark output as stale when code changes
   useEffect(() => {
@@ -45,6 +50,12 @@ function App() {
     }
   }
 
+  // If not authenticated, show login page
+  if (!isAuthenticated) {
+    return <Login />
+  }
+
+  // Otherwise, show the main application
   return (
     <div className="flex h-screen flex-col bg-gray-50">
       {/* Fixed header */}
@@ -62,6 +73,16 @@ function App() {
                 onSelectConversation={setSelectedConversationId}
                 selectedConversationId={selectedConversationId}
               />
+            </div>
+
+            {/* Right - Logout button */}
+            <div className="absolute right-4">
+              <button
+                onClick={logout}
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Sign out
+              </button>
             </div>
           </div>
         </div>

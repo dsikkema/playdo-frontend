@@ -1,9 +1,33 @@
 import { Conversation, ConversationListResponse } from '../types'
 import { config } from '../config'
 
+// Helper function to get the auth token from localStorage
+const getAuthToken = (): string | null => {
+  return localStorage.getItem('playdo_auth_token')
+}
+
+// Helper function to create headers with auth token if available
+const createHeaders = (contentType = 'application/json'): HeadersInit => {
+  const headers: HeadersInit = {
+    'Content-Type': contentType
+  }
+
+  const token = getAuthToken()
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  return headers
+}
+
 export async function fetchConversation(id: number): Promise<Conversation> {
   try {
-    const response = await fetch(`${config.backendUrl}/api/conversations/${id}`)
+    const response = await fetch(
+      `${config.backendUrl}/api/conversations/${id}`,
+      {
+        headers: createHeaders()
+      }
+    )
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`)
@@ -19,7 +43,9 @@ export async function fetchConversation(id: number): Promise<Conversation> {
 
 export async function fetchConversationIds(): Promise<number[]> {
   try {
-    const response = await fetch(`${config.backendUrl}/api/conversations`)
+    const response = await fetch(`${config.backendUrl}/api/conversations`, {
+      headers: createHeaders()
+    })
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`)
@@ -45,9 +71,7 @@ export async function sendMessage(
       `${config.backendUrl}/api/conversations/${conversationId}/send_message`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: createHeaders(),
         body: JSON.stringify({
           message,
           editor_code,
@@ -73,9 +97,7 @@ export async function createConversation(): Promise<number> {
   try {
     const response = await fetch(`${config.backendUrl}/api/conversations`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: createHeaders()
     })
 
     if (!response.ok) {

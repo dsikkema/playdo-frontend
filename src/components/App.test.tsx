@@ -5,6 +5,20 @@ import App from './App'
 import usePythonExecution from '../hooks/usePythonExecution'
 import { PyodideStatus } from '../services/pyodide'
 
+// Set up the mock for AuthContext
+const mockLogout = vi.fn()
+const mockUseAuth = vi.fn(() => ({
+  isAuthenticated: true,
+  token: 'mock-token',
+  login: vi.fn(),
+  logout: mockLogout
+}))
+
+// Mock the useAuth hook
+vi.mock('../context/AuthContext', () => ({
+  useAuth: () => mockUseAuth()
+}))
+
 // Note: deleted previous implementation that mocked api out, because App doesn't directly use api,
 // and children components that _do_ use it are mocked in this test, and this fact helps demonstrate
 // the value of mocking out those child components entirely.
@@ -71,6 +85,11 @@ vi.mock('./CodeEditor', () => ({
       />
     </div>
   )
+}))
+
+// Mock the Login component
+vi.mock('./Login', () => ({
+  default: () => <div data-testid="mock-login">Login Form</div>
 }))
 
 // Mock the OutputDisplay component
@@ -144,7 +163,34 @@ describe('<App />', () => {
     })
   })
 
-  it('should render the main components correctly', () => {
+  it('should render the login screen when not authenticated', () => {
+    // Mock unauthenticated state
+    mockUseAuth.mockReturnValueOnce({
+      isAuthenticated: false,
+      token: '', // Empty string instead of null
+      login: vi.fn(),
+      logout: vi.fn()
+    })
+
+    // Arrange & Act
+    render(<App />)
+
+    // Assert
+    expect(screen.getByTestId('mock-login')).toBeInTheDocument()
+    expect(
+      screen.queryByTestId('mock-conversation-selector')
+    ).not.toBeInTheDocument()
+  })
+
+  it('should render the main components correctly when authenticated', () => {
+    // Mock authenticated state
+    mockUseAuth.mockReturnValueOnce({
+      isAuthenticated: true,
+      token: 'mock-token',
+      login: vi.fn(),
+      logout: vi.fn()
+    })
+
     // Arrange & Act
     render(<App />)
 
@@ -154,7 +200,15 @@ describe('<App />', () => {
     expect(screen.getByTestId('mock-conversation-view')).toBeInTheDocument()
   })
 
-  it('should render the run button', () => {
+  it('should render the run button when authenticated', () => {
+    // Mock authenticated state
+    mockUseAuth.mockReturnValueOnce({
+      isAuthenticated: true,
+      token: 'mock-token',
+      login: vi.fn(),
+      logout: vi.fn()
+    })
+
     // Arrange & Act
     render(<App />)
 
@@ -162,7 +216,15 @@ describe('<App />', () => {
     expect(screen.getByTestId('run-code-button')).toBeInTheDocument()
   })
 
-  it('should render the OutputDisplay component', () => {
+  it('should render the OutputDisplay component when authenticated', () => {
+    // Mock authenticated state
+    mockUseAuth.mockReturnValueOnce({
+      isAuthenticated: true,
+      token: 'mock-token',
+      login: vi.fn(),
+      logout: vi.fn()
+    })
+
     // Arrange & Act
     render(<App />)
 
@@ -171,6 +233,14 @@ describe('<App />', () => {
   })
 
   it('should execute code when the run button is clicked', async () => {
+    // Mock authenticated state
+    mockUseAuth.mockReturnValueOnce({
+      isAuthenticated: true,
+      token: 'mock-token',
+      login: vi.fn(),
+      logout: vi.fn()
+    })
+
     // Arrange
     const user = userEvent.setup()
     render(<App />)
@@ -186,7 +256,15 @@ describe('<App />', () => {
     )
   })
 
-  it('should initialize Pyodide on component mount', async () => {
+  it('should initialize Pyodide on component mount when authenticated', async () => {
+    // Mock authenticated state
+    mockUseAuth.mockReturnValueOnce({
+      isAuthenticated: true,
+      token: 'mock-token',
+      login: vi.fn(),
+      logout: vi.fn()
+    })
+
     // Arrange
     const mockInitialize = vi.fn().mockResolvedValue(undefined)
     vi.mocked(usePythonExecution).mockReturnValue({
@@ -209,6 +287,14 @@ describe('<App />', () => {
   })
 
   it('should handle Python execution errors gracefully', async () => {
+    // Mock authenticated state
+    mockUseAuth.mockReturnValueOnce({
+      isAuthenticated: true,
+      token: 'mock-token',
+      login: vi.fn(),
+      logout: vi.fn()
+    })
+
     // Arrange
     const mockExecuteWithError = vi
       .fn()
@@ -247,6 +333,14 @@ describe('<App />', () => {
   })
 
   it('should pass execution result to OutputDisplay after running code', async () => {
+    // Mock authenticated state
+    mockUseAuth.mockReturnValueOnce({
+      isAuthenticated: true,
+      token: 'mock-token',
+      login: vi.fn(),
+      logout: vi.fn()
+    })
+
     // Arrange
     const user = userEvent.setup()
     const executionResult = {

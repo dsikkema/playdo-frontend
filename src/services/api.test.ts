@@ -6,6 +6,12 @@ vi.mock('../config', () => ({
   config: { backendUrl: 'http://test-backend' }
 }))
 
+// Mock localStorage
+const mockLocalStorage = {
+  getItem: vi.fn().mockReturnValue(null)
+}
+Object.defineProperty(window, 'localStorage', { value: mockLocalStorage })
+
 // Import the REAL API functions
 import {
   fetchConversation,
@@ -21,12 +27,24 @@ const mockFetch = vi.fn()
 beforeEach(() => {
   global.fetch = mockFetch
   vi.clearAllMocks()
+  mockLocalStorage.getItem.mockReturnValue(null)
 })
 
 afterEach(() => {
   global.fetch = originalFetch
   mockFetch.mockReset()
 })
+
+// Default headers for all API requests
+const defaultHeaders = {
+  'Content-Type': 'application/json'
+}
+
+// Headers with auth token
+const authHeaders = {
+  'Content-Type': 'application/json',
+  Authorization: 'Bearer test-token'
+}
 
 // Rewrite the tests to use the real API functions
 
@@ -56,7 +74,35 @@ describe('API Service', () => {
 
       // Verify expectations
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test-backend/api/conversations/1'
+        'http://test-backend/api/conversations/1',
+        { headers: defaultHeaders }
+      )
+      expect(result).toEqual(mockConversation)
+    })
+
+    it('includes auth token in headers when available', async () => {
+      // Setup mock response with auth token
+      mockLocalStorage.getItem.mockReturnValueOnce('test-token')
+
+      const mockConversation: Conversation = {
+        id: 1,
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
+        messages: []
+      }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockConversation
+      })
+
+      // Call the REAL implementation
+      const result = await fetchConversation(1)
+
+      // Verify expectations
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://test-backend/api/conversations/1',
+        { headers: authHeaders }
       )
       expect(result).toEqual(mockConversation)
     })
@@ -88,7 +134,8 @@ describe('API Service', () => {
 
       // Verify expectations
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://test-backend/api/conversations'
+        'http://test-backend/api/conversations',
+        { headers: defaultHeaders }
       )
       expect(result).toEqual(mockIds)
     })
@@ -143,9 +190,7 @@ describe('API Service', () => {
         'http://test-backend/api/conversations/1/send_message',
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: defaultHeaders,
           body: JSON.stringify({
             message: mockMessage,
             editor_code: null,
@@ -189,9 +234,7 @@ describe('API Service', () => {
         'http://test-backend/api/conversations',
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: defaultHeaders
         }
       )
       expect(result).toBe(5)

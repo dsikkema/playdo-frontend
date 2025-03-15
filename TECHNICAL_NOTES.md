@@ -22,6 +22,8 @@ This repository contains the frontend code for Playdo. The backend serves up a R
 - **OutputDisplay.tsx**: Shows execution results, including stdout and stderr
 - **ConversationManager.tsx**: Manages the AI assistant chat interface with code context tracking
 - **Message.tsx**: Renders individual conversation messages with markdown support and HTML sanitization
+- **Login.tsx**: Handles user authentication with a form-based login interface
+- **AuthContext.tsx**: Provides authentication state and functions across the application
 
 ### `src/` File Structure
 
@@ -38,11 +40,16 @@ src
 │   ├── ConversationManager.tsx
 │   ├── ConversationSelector.test.tsx
 │   ├── ConversationSelector.tsx
+│   ├── Login.test.tsx
+│   ├── Login.tsx
 │   ├── Message.test.tsx
 │   ├── Message.tsx
 │   ├── OutputDisplay.test.tsx
 │   └── OutputDisplay.tsx
 ├── config.ts
+├── context
+│   ├── AuthContext.test.tsx
+│   └── AuthContext.tsx
 ├── hooks
 │   ├── usePythonExecution.test.ts
 │   └── usePythonExecution.ts
@@ -78,7 +85,39 @@ src
    - Responses are displayed in the conversation view
    - Messages are rendered with markdown support and sanitized HTML using the Message component
 
+3. **Authentication Flow**:
+   - User visits the application and is presented with the Login screen
+   - User enters credentials in the Login component
+   - Credentials are sent to the backend API via the login endpoint
+   - Upon successful authentication, the backend returns a JWT token
+   - Token is stored in localStorage and in the AuthContext state
+   - Application renders the main interface instead of the login screen
+   - Subsequent API requests include the token in the Authorization header
+   - User can logout, which clears the token from localStorage and AuthContext
+
 ## Technical Implementation
+
+### Authentication System
+
+- **AuthContext.tsx**: Context provider for authentication state and functions
+
+  - Manages token storage and retrieval from localStorage
+  - Provides isAuthenticated state to components
+  - Exposes login() and logout() functions
+  - Initializes authentication state from localStorage on app load
+
+- **Login.tsx**: Component for user authentication
+  - Provides a form for username and password input
+  - Handles login API requests and response parsing
+  - Manages form state and validation
+  - Displays loading state during authentication
+  - Shows errors for failed login attempts
+
+- **API Authentication Integration**:
+  - API service automatically includes JWT token in requests
+  - Helper functions for creating authenticated headers
+  - Token retrieved from localStorage for API calls
+  - Error handling for authentication failures
 
 ### Code-Chat Integration
 
@@ -115,6 +154,7 @@ src
   - Current code in editor
   - Output staleness tracking
   - Coordinates the Python execution process
+  - Conditionally renders Login or main application based on authentication status
 
 - **CodeEditor.tsx**: Accepts props for:
 
@@ -139,6 +179,11 @@ src
   - Processes markdown content with marked library
   - Sanitizes HTML with DOMPurify to prevent XSS attacks
 
+- **Login.tsx**: Uses state for:
+  - Username and password input values
+  - Loading state during authentication
+  - Error messages from failed login attempts
+
 ## API Integration
 
 The frontend communicates with the Flask backend API for:
@@ -146,6 +191,14 @@ The frontend communicates with the Flask backend API for:
 - Retrieving and sending conversation messages
 - Storing code snippets and execution results
 - Tracking learning progress
+- User authentication and session management
+
+### Authentication API
+
+- `/api/login` endpoint accepts:
+  - POST requests with username and password
+  - Returns JWT token on successful authentication
+  - Returns error messages on authentication failures
 
 ### Enhanced Message Format
 
@@ -167,6 +220,7 @@ The frontend communicates with the Flask backend API for:
 3. **Component Separation**: Clear boundaries between UI components align with single responsibility principle
 4. **State Management**: React hooks pattern for local state management
 5. **Type Safety**: Comprehensive TypeScript typing throughout the application
+6. **Secure By Design**: Authentication integrated throughout the application with proper token management
 
 ## Technical Dependencies
 
@@ -176,3 +230,4 @@ The frontend communicates with the Flask backend API for:
 - Vite for development and building
 - 'Marked' for markdown parsing
 - DOMPurify for HTML sanitization
+- JWT for secure authentication
