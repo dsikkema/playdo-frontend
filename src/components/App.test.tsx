@@ -343,15 +343,36 @@ describe('<App />', () => {
 
     // Arrange
     const user = userEvent.setup()
-    render(<App />)
-    const runButton = screen.getByTestId('run-code-button')
+    const executionResult = {
+      stdout: 'Test output',
+      stderr: 'Test error',
+      error: null,
+      result: 'Test result'
+    }
+
+    vi.mocked(usePythonExecution).mockReturnValue({
+      executeCode: mockExecuteCode,
+      initialize: vi.fn(),
+      result: executionResult,
+      isCodeRunning: false,
+      status: PyodideStatus.READY,
+      isPyodideInitializing: false,
+      error: null
+    })
 
     // Act
-    await user.click(runButton)
+    render(<App />)
+    await user.click(screen.getByTestId('run-code-button'))
 
-    // Assert - verify that the result is displayed
-    expect(screen.getByTestId('mock-stdout')).toHaveTextContent(
-      'Execution output'
-    )
+    // Assert
+    expect(mockExecuteCode).toHaveBeenCalled()
+
+    // Check that the OutputDisplay component is rendered
+    const outputContainer = screen.getByTestId('mock-output-display')
+    expect(outputContainer).toBeInTheDocument()
+
+    // Check that it's displaying the expected output
+    expect(screen.getByTestId('mock-stdout')).toHaveTextContent('Test output')
+    expect(screen.getByTestId('mock-stderr')).toHaveTextContent('Test error')
   })
 })

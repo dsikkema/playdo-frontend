@@ -20,6 +20,12 @@ const Login: React.FC = () => {
    * new element gets attached to this ref with ref={usernameRef}, then the .current will be nulled or updated respectively.
    */
   const usernameRef = useRef<HTMLInputElement>(null)
+
+  /**
+   * Note: using the magic of context here. whenever the context updates, all components that depend on it (including this one)
+   * will re-render. Hence the need to avoid super global context objects - composition is key, because it means updates to
+   * one context (e.g. useTheme, if there was one) won't cause re-renders to components that only depend on useAuth
+   */
   const { login } = useAuth()
 
   useEffect(() => {

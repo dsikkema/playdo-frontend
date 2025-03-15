@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const value = {
     token,
-    isAuthenticated: !!token,
+    isAuthenticated: Boolean(token),
     login,
     logout
   }
