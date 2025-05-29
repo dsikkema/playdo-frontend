@@ -36,6 +36,15 @@ function App() {
     }
   }, [initialize, isAuthenticated])
 
+  // Clear all user-specific state when user logs out
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSelectedConversationId(null)
+      setCode("# Write your Python code here\nprint('Hello, Playdo!')")
+      setOutputIsStale(true)
+    }
+  }, [isAuthenticated])
+
   // Mark output as stale when code changes
   useEffect(() => {
     setOutputIsStale(true)
