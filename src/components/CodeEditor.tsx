@@ -3,6 +3,8 @@ import CodeMirror from '@uiw/react-codemirror'
 import { python } from '@codemirror/lang-python'
 import { keymap } from '@codemirror/view'
 import { Prec } from '@codemirror/state'
+import { oneDark } from '@codemirror/theme-one-dark'
+import { useTheme } from '../context/ThemeContext'
 
 export type CodeEditorProps = {
   initialCode?: string
@@ -16,6 +18,7 @@ function CodeEditor({
   onRunCode
 }: CodeEditorProps) {
   const [code, setCode] = useState(initialCode)
+  const { resolvedTheme } = useTheme()
 
   const handleChange = (value: string) => {
     setCode(value)
@@ -52,9 +55,14 @@ function CodeEditor({
     [onRunCode]
   )
 
+  // Create extensions array
+  const extensions = useMemo(() => {
+    return [runCodeKeymap, python()]
+  }, [runCodeKeymap])
+
   return (
-    <div className="flex size-full flex-col rounded-lg border border-gray-200 bg-white shadow-soft transition-all duration-300 hover:shadow-lg">
-      <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/50 px-4 py-2">
+    <div className="flex size-full flex-col rounded-lg border border-gray-200 bg-white shadow-soft transition-all duration-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800">
+      <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/50 px-4 py-2 dark:border-gray-700 dark:from-gray-700 dark:to-gray-600/50">
         <div className="flex items-center gap-2">
           <svg
             className="size-4 text-primary-600"
@@ -70,14 +78,17 @@ function CodeEditor({
               d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
             />
           </svg>
-          <div className="text-sm font-medium text-gray-700">Python Editor</div>
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Python Editor
+          </div>
         </div>
       </div>
       <div className="size-full overflow-auto">
         <CodeMirror
           value={code}
           height="100%"
-          extensions={[runCodeKeymap, python()]}
+          theme={resolvedTheme === 'dark' ? oneDark : undefined}
+          extensions={extensions}
           onChange={handleChange}
           basicSetup={{
             lineNumbers: true,

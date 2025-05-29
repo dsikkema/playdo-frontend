@@ -2,6 +2,7 @@
 
 export default {
   content: ['./src/**/*.{mjs,js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -111,6 +112,15 @@ export default {
               fontSize: '0.9em',
               fontWeight: 'normal',
               whiteSpace: 'pre-wrap'
+            }
+          }
+        },
+        invert: {
+          css: {
+            'code:not(pre code)': {
+              backgroundColor: '#1f2937',
+              color: '#60a5fa',
+              border: '1px solid #374151'
             }
           }
         }

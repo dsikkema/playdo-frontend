@@ -5,6 +5,7 @@ import ConversationSelector from './ConversationSelector'
 import CodeEditor from './CodeEditor'
 import OutputDisplay from './OutputDisplay'
 import Login from './Login'
+import ThemeToggle from './ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 import usePythonExecution from '../hooks/usePythonExecution'
 
@@ -66,9 +67,9 @@ function App() {
 
   // Otherwise, show the main application
   return (
-    <div className="flex h-screen flex-col bg-gradient-to-br from-gray-50 to-primary-50/20">
+    <div className="flex h-screen flex-col bg-gradient-to-br from-gray-50 to-primary-50/20 dark:from-gray-900 dark:to-gray-800">
       {/* Fixed header */}
-      <header className="z-10 bg-white/90 shadow-soft backdrop-blur-sm transition-all duration-300">
+      <header className="z-10 bg-white/90 shadow-soft backdrop-blur-sm transition-all duration-300 dark:bg-gray-800/90">
         <div className="container mx-auto px-4 py-3">
           <div className="relative flex items-center">
             {/* Left - App Title */}
@@ -86,11 +87,12 @@ function App() {
               />
             </div>
 
-            {/* Right - Logout button */}
-            <div className="absolute right-4">
+            {/* Right - Theme toggle and Logout button */}
+            <div className="absolute right-4 flex items-center gap-3">
+              <ThemeToggle />
               <button
                 onClick={logout}
-                className="text-sm text-gray-600 transition-colors duration-200 hover:text-gray-900"
+                className="text-sm text-gray-600 transition-colors duration-200 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
               >
                 Sign out
               </button>

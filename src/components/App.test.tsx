@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import App from './App'
 import usePythonExecution from '../hooks/usePythonExecution'
 import { PyodideStatus } from '../services/pyodide'
+import { ThemeProvider } from '../context/ThemeContext'
 
 // Set up the mock for AuthContext
 const mockLogout = vi.fn()
@@ -173,7 +174,11 @@ describe('<App />', () => {
     })
 
     // Arrange & Act
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     // Assert
     expect(screen.getByTestId('mock-login')).toBeInTheDocument()
@@ -192,7 +197,11 @@ describe('<App />', () => {
     })
 
     // Arrange & Act
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     // Assert
     expect(screen.getByTestId('mock-conversation-selector')).toBeInTheDocument()
@@ -210,7 +219,11 @@ describe('<App />', () => {
     })
 
     // Arrange & Act
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     // Assert
     expect(screen.getByTestId('run-code-button')).toBeInTheDocument()
@@ -226,7 +239,11 @@ describe('<App />', () => {
     })
 
     // Arrange & Act
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     // Assert
     expect(screen.getByTestId('mock-output-display')).toBeInTheDocument()
@@ -243,7 +260,11 @@ describe('<App />', () => {
 
     // Arrange
     const user = userEvent.setup()
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
     const runButton = screen.getByTestId('run-code-button')
 
     // Act
@@ -278,7 +299,11 @@ describe('<App />', () => {
     })
 
     // Act
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     // Assert
     await waitFor(() => {
@@ -315,7 +340,11 @@ describe('<App />', () => {
       .mockImplementation(() => {})
 
     const user = userEvent.setup()
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
     const runButton = screen.getByTestId('run-code-button')
 
     // Act
@@ -361,7 +390,11 @@ describe('<App />', () => {
     })
 
     // Act
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
     await user.click(screen.getByTestId('run-code-button'))
 
     // Assert
@@ -397,7 +430,11 @@ describe('<App />', () => {
 
     // Arrange
     const user = userEvent.setup()
-    const { rerender } = render(<App />)
+    const { rerender } = render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     // Act 1: Select a conversation and modify code while authenticated
     await user.click(screen.getByTestId('select-conversation-button'))
@@ -416,7 +453,11 @@ describe('<App />', () => {
     // Act 2: Simulate logout by changing authentication state
     isAuthenticated = false
     currentToken = null
-    rerender(<App />)
+    rerender(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     // Assert 2: Should show login screen (since user is no longer authenticated)
     expect(screen.getByTestId('mock-login')).toBeInTheDocument()
@@ -427,7 +468,11 @@ describe('<App />', () => {
     // Act 3: Simulate login again as a different user with different token
     isAuthenticated = true
     currentToken = 'user2-token'
-    rerender(<App />)
+    rerender(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     // Assert 3: All user state should be cleared due to useEffect
     expect(screen.getByTestId('selected-id')).toHaveTextContent('')

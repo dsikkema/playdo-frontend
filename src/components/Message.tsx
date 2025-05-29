@@ -88,7 +88,7 @@ function Message({ message }: MessageProps) {
           'group relative max-w-[70%] rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md',
           isUser
             ? 'bg-gradient-to-br from-secondary-50 to-secondary-100/50 text-secondary-900'
-            : 'bg-white text-gray-800 border border-gray-200'
+            : 'bg-white text-gray-800 border border-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600'
         )}
       >
         <div className="mb-1 flex items-center gap-2">
@@ -118,7 +118,7 @@ function Message({ message }: MessageProps) {
         <div
           className={classNames(
             'prose prose-sm max-w-none',
-            isUser ? 'prose-secondary' : 'prose-gray'
+            isUser ? 'prose-secondary' : 'prose-gray dark:prose-invert'
           )}
           style={{ fontFamily: 'Georgia, serif' }}
         >

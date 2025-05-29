@@ -178,7 +178,7 @@ function ConversationManager({
       <div className="flex h-full animate-fade-in items-center justify-center">
         <div className="text-center">
           <svg
-            className="mx-auto mb-4 size-16 text-gray-300"
+            className="mx-auto mb-4 size-16 text-gray-300 dark:text-gray-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -191,10 +191,10 @@ function ConversationManager({
               d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
             />
           </svg>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-gray-400">
             Please select a conversation from the list
           </p>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
             or create a new one to get started
           </p>
         </div>
@@ -229,7 +229,9 @@ function ConversationManager({
               ></path>
             </svg>
           </div>
-          <p className="text-gray-500">Loading conversation...</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Loading conversation...
+          </p>
         </div>
       </div>
     )
@@ -261,10 +263,10 @@ function ConversationManager({
   }
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-soft">
+    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-soft dark:border-gray-700 dark:bg-gray-800">
       {/* Fixed conversation title */}
-      <div className="shrink-0 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/50 px-6 py-4">
-        <h1 className="text-xl font-semibold text-gray-800">
+      <div className="shrink-0 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/50 px-6 py-4 dark:border-gray-700 dark:from-gray-700 dark:to-gray-600/50">
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
           Conversation #{conversation?.id || conversationId}
         </h1>
       </div>
@@ -286,7 +288,7 @@ function ConversationManager({
             <div className="flex h-full animate-fade-in items-center justify-center">
               <div className="text-center">
                 <svg
-                  className="mx-auto mb-4 size-20 text-gray-200"
+                  className="mx-auto mb-4 size-20 text-gray-200 dark:text-gray-700"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -299,8 +301,10 @@ function ConversationManager({
                     d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
                   />
                 </svg>
-                <p className="text-gray-500">No messages yet</p>
-                <p className="mt-1 text-sm text-gray-400">
+                <p className="text-gray-500 dark:text-gray-400">
+                  No messages yet
+                </p>
+                <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
                   Start the conversation by asking a question
                 </p>
               </div>
@@ -310,13 +314,13 @@ function ConversationManager({
       </div>
 
       {/* Fixed message input area */}
-      <div className="shrink-0 border-t border-gray-200 bg-gray-50 p-4">
+      <div className="shrink-0 border-t border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-700">
         <form onSubmit={handleSendMessage} className="flex items-start gap-2">
           <textarea
             value={messageInput}
             onChange={handleTextareaChange}
             placeholder="Type your message..."
-            className="flex-1 resize-none overflow-y-auto rounded-lg border border-gray-300 bg-white p-3 text-sm shadow-sm transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="flex-1 resize-none overflow-y-auto rounded-lg border border-gray-300 bg-white p-3 text-sm shadow-sm transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400"
             disabled={sending}
             rows={1}
             style={{ minHeight: '42px', maxHeight: '150px' }}

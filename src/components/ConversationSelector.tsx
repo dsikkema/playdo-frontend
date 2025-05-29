@@ -70,14 +70,14 @@ function ConversationSelector({
     <div className="flex items-center space-x-3">
       <label
         htmlFor="conversation-select"
-        className="whitespace-nowrap text-sm font-medium text-gray-600"
+        className="whitespace-nowrap text-sm font-medium text-gray-600 dark:text-gray-300"
       >
         Select conversation:
       </label>
       <div className="relative w-56">
         <select
           id="conversation-select"
-          className="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm transition-all duration-200 hover:border-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          className="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm transition-all duration-200 hover:border-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           value={
             selectedConversationId === null
               ? ''
@@ -95,7 +95,9 @@ function ConversationSelector({
         </select>
         {loading && (
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-8">
-            <p className="text-xs text-gray-500">Loading...</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Loading...
+            </p>
           </div>
         )}
       </div>
@@ -149,7 +151,9 @@ function ConversationSelector({
         )}
       </button>
       {error && (
-        <p className="ml-2 animate-fade-in text-xs text-red-600">{error}</p>
+        <p className="ml-2 animate-fade-in text-xs text-red-600 dark:text-red-400">
+          {error}
+        </p>
       )}
     </div>
   )
