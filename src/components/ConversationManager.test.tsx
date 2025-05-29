@@ -53,7 +53,7 @@ describe('<ConversationView />', () => {
 
     // Assert
     expect(
-      screen.getByText('Please select a conversation from the list.')
+      screen.getByText('Please select a conversation from the list')
     ).toBeInTheDocument()
     expect(mockFetchConversation).not.toHaveBeenCalled()
   })
@@ -146,10 +146,9 @@ describe('<ConversationView />', () => {
     // Assert - Step 1: Verify empty conversation state
     await waitFor(() => {
       // 1. Assert the proper 'no messages' content is displayed
+      expect(screen.getByText('No messages yet')).toBeInTheDocument()
       expect(
-        screen.getByText(
-          'No messages found. Start the conversation by sending a message below.'
-        )
+        screen.getByText('Start the conversation by asking a question')
       ).toBeInTheDocument()
 
       // 2. Assert that the input element is present
@@ -177,8 +176,7 @@ describe('<ConversationView />', () => {
       expect(screen.getByText(user_msg)).toBeInTheDocument()
       expect(screen.getByText(assistant_msg)).toBeInTheDocument()
       expect(screen.getAllByText('You').length).toBe(1)
-      expect(screen.getByText('Playdo')).toBeInTheDocument()
-      expect(screen.getAllByText('Playdo').length).toBe(1)
+      expect(screen.getByText('Playdo Assistant')).toBeInTheDocument()
     })
 
     // Verify the API was called correctly
@@ -256,7 +254,7 @@ describe('<ConversationView />', () => {
     await waitFor(() => {
       expect(screen.getByText('Conversation #2')).toBeInTheDocument()
       expect(screen.getAllByText('You').length).toBe(2)
-      expect(screen.getByText('Playdo')).toBeInTheDocument()
+      expect(screen.getByText('Playdo Assistant')).toBeInTheDocument()
       expect(screen.getByText('Hello, how are you?')).toBeInTheDocument()
       expect(
         screen.getByText('I am doing well, thank you!')

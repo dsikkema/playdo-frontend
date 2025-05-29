@@ -1,5 +1,5 @@
 // src/components/App.tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import ConversationManager from './ConversationManager'
 import ConversationSelector from './ConversationSelector'
 import CodeEditor from './CodeEditor'
@@ -50,14 +50,14 @@ function App() {
     setOutputIsStale(true)
   }, [code])
 
-  const handleRunCode = async () => {
+  const handleRunCode = useCallback(async () => {
     try {
       await executeCode(code)
       setOutputIsStale(false) // Mark output as fresh after running code
     } catch (error) {
       console.error('Failed to execute code:', error)
     }
-  }
+  }, [code, executeCode])
 
   // If not authenticated, show login page
   if (!isAuthenticated) {
@@ -66,14 +66,16 @@ function App() {
 
   // Otherwise, show the main application
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
+    <div className="flex h-screen flex-col bg-gradient-to-br from-gray-50 to-primary-50/20">
       {/* Fixed header */}
-      <header className="z-10 bg-white shadow">
+      <header className="z-10 bg-white/90 shadow-soft backdrop-blur-sm transition-all duration-300">
         <div className="container mx-auto px-4 py-3">
           <div className="relative flex items-center">
             {/* Left - App Title */}
             <div className="absolute left-4">
-              <h1 className="text-xl font-bold text-green-600">Playdo</h1>
+              <h1 className="bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-xl font-bold text-transparent">
+                Playdo
+              </h1>
             </div>
 
             {/* Center - Conversation Selector */}
@@ -88,7 +90,7 @@ function App() {
             <div className="absolute right-4">
               <button
                 onClick={logout}
-                className="text-sm text-gray-600 hover:text-gray-900"
+                className="text-sm text-gray-600 transition-colors duration-200 hover:text-gray-900"
               >
                 Sign out
               </button>
@@ -98,20 +100,25 @@ function App() {
       </header>
 
       {/* Main content - non-scrollable container */}
-      <div className="container mx-auto flex-1 overflow-hidden p-4">
+      <div className="container mx-auto flex-1 animate-fade-in overflow-hidden p-4">
         <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Code editor column - left side */}
           <div className="flex h-full flex-col overflow-hidden">
             {/* Code editor - take 2/3 height */}
             <div className="mb-4 grow overflow-hidden">
               <div className="relative h-full">
-                <CodeEditor initialCode={code} onChange={setCode} />
+                <CodeEditor
+                  initialCode={code}
+                  onChange={setCode}
+                  onRunCode={handleRunCode}
+                />
                 <button
                   onClick={handleRunCode}
                   disabled={isCodeRunning || isPyodideInitializing}
-                  className="absolute bottom-4 right-4 rounded-full bg-green-500 p-3 text-white shadow-lg transition hover:bg-green-600 disabled:bg-green-300"
+                  className="absolute bottom-4 right-4 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 p-3 text-white shadow-soft transition-all duration-200 hover:scale-105 hover:shadow-glow-green disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none disabled:hover:scale-100"
                   data-testid="run-code-button"
                   aria-label="Run code"
+                  title="Run code (Ctrl+Enter)"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

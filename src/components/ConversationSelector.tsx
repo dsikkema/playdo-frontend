@@ -67,17 +67,17 @@ function ConversationSelector({
   }
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center space-x-3">
       <label
         htmlFor="conversation-select"
-        className="whitespace-nowrap text-sm font-medium text-gray-700"
+        className="whitespace-nowrap text-sm font-medium text-gray-600"
       >
         Select conversation:
       </label>
       <div className="relative w-56">
         <select
           id="conversation-select"
-          className="block w-full rounded-md border-gray-300 py-1.5 pl-3 pr-10 text-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+          className="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm transition-all duration-200 hover:border-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
           value={
             selectedConversationId === null
               ? ''
@@ -102,11 +102,55 @@ function ConversationSelector({
       <button
         onClick={handleCreateConversation}
         disabled={creatingConversation || loading}
-        className="whitespace-nowrap rounded-md bg-green-500 px-3 py-1.5 text-sm text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-green-300"
+        className="flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:from-primary-600 hover:to-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none"
       >
-        {creatingConversation ? 'Creating...' : 'New Conversation'}
+        {creatingConversation ? (
+          <>
+            <svg
+              className="size-4 animate-spin"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Creating...
+          </>
+        ) : (
+          <>
+            <svg
+              className="size-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            New Conversation
+          </>
+        )}
       </button>
-      {error && <p className="ml-2 text-xs text-red-600">{error}</p>}
+      {error && (
+        <p className="ml-2 animate-fade-in text-xs text-red-600">{error}</p>
+      )}
     </div>
   )
 }

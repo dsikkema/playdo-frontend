@@ -175,33 +175,102 @@ function ConversationManager({
 
   if (conversationId == null) {
     return (
-      <div className="py-8">Please select a conversation from the list.</div>
+      <div className="flex h-full animate-fade-in items-center justify-center">
+        <div className="text-center">
+          <svg
+            className="mx-auto mb-4 size-16 text-gray-300"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+            />
+          </svg>
+          <p className="text-gray-500">
+            Please select a conversation from the list
+          </p>
+          <p className="mt-1 text-sm text-gray-400">
+            or create a new one to get started
+          </p>
+        </div>
+      </div>
     )
   }
 
   // Show loading state
   if (loading) {
     return (
-      <div className="flex justify-center py-8">Loading conversation...</div>
+      <div className="flex h-full animate-fade-in items-center justify-center">
+        <div className="flex flex-col items-center">
+          <div className="mb-4">
+            <svg
+              className="size-10 animate-spin-slow text-primary-500"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+          </div>
+          <p className="text-gray-500">Loading conversation...</p>
+        </div>
+      </div>
     )
   }
 
   // Show error state
   if (error) {
-    return <div className="py-8 text-red-500">{error}</div>
+    return (
+      <div className="flex h-full animate-fade-in items-center justify-center">
+        <div className="text-center">
+          <svg
+            className="mx-auto mb-4 size-16 text-red-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <p className="text-red-500">{error}</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white shadow-soft">
       {/* Fixed conversation title */}
-      <div className="shrink-0 pb-2">
-        <h1 className="text-2xl font-bold">
+      <div className="shrink-0 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100/50 px-6 py-4">
+        <h1 className="text-xl font-semibold text-gray-800">
           Conversation #{conversation?.id || conversationId}
         </h1>
       </div>
 
       {/* Scrollable message container - flex grow to fill available space */}
-      <div ref={messageContainerRef} className="mb-2 grow overflow-y-auto pr-1">
+      <div ref={messageContainerRef} className="grow overflow-y-auto px-6 py-4">
         <div className="space-y-4">
           {conversation &&
           conversation.messages &&
@@ -214,22 +283,40 @@ function ConversationManager({
               <div ref={messagesEndRef} />
             </>
           ) : (
-            <div className="py-8 text-center text-gray-500">
-              No messages found. Start the conversation by sending a message
-              below.
+            <div className="flex h-full animate-fade-in items-center justify-center">
+              <div className="text-center">
+                <svg
+                  className="mx-auto mb-4 size-20 text-gray-200"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+                  />
+                </svg>
+                <p className="text-gray-500">No messages yet</p>
+                <p className="mt-1 text-sm text-gray-400">
+                  Start the conversation by asking a question
+                </p>
+              </div>
             </div>
           )}
         </div>
       </div>
 
       {/* Fixed message input area */}
-      <div className="shrink-0 border-t border-gray-200 pt-2">
-        <form onSubmit={handleSendMessage} className="flex items-start">
+      <div className="shrink-0 border-t border-gray-200 bg-gray-50 p-4">
+        <form onSubmit={handleSendMessage} className="flex items-start gap-2">
           <textarea
             value={messageInput}
             onChange={handleTextareaChange}
             placeholder="Type your message..."
-            className="flex-1 resize-none overflow-y-auto rounded-l-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 resize-none overflow-y-auto rounded-lg border border-gray-300 bg-white p-3 text-sm shadow-sm transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             disabled={sending}
             rows={1}
             style={{ minHeight: '42px', maxHeight: '150px' }}
@@ -244,7 +331,7 @@ function ConversationManager({
           />
           <button
             type="submit"
-            className="h-[42px] rounded-r-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
+            className="h-[42px] rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:from-primary-600 hover:to-primary-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none"
             disabled={sending || !messageInput.trim()}
           >
             {sending ? 'Sending...' : 'Send'}
