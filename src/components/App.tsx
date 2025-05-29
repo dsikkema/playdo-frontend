@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import usePythonExecution from '../hooks/usePythonExecution'
 
 function App() {
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, logout, token } = useAuth()
   const [selectedConversationId, setSelectedConversationId] = useState<
     number | null
   >(null)
@@ -57,7 +57,7 @@ function App() {
 
   // Otherwise, show the main application
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
+    <div key={token} className="flex h-screen flex-col bg-gray-50">
       {/* Fixed header */}
       <header className="z-10 bg-white shadow">
         <div className="container mx-auto px-4 py-3">

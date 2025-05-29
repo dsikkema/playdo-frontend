@@ -9,7 +9,7 @@ import { PyodideStatus } from '../services/pyodide'
 const mockLogout = vi.fn()
 const mockUseAuth = vi.fn(() => ({
   isAuthenticated: true,
-  token: 'mock-token',
+  token: 'mock-token' as string | null,
   login: vi.fn(),
   logout: mockLogout
 }))
@@ -167,7 +167,7 @@ describe('<App />', () => {
     // Mock unauthenticated state
     mockUseAuth.mockReturnValueOnce({
       isAuthenticated: false,
-      token: '', // Empty string instead of null
+      token: null,
       login: vi.fn(),
       logout: vi.fn()
     })
@@ -186,7 +186,7 @@ describe('<App />', () => {
     // Mock authenticated state
     mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
-      token: 'mock-token',
+      token: 'mock-token' as string | null,
       login: vi.fn(),
       logout: vi.fn()
     })
@@ -204,7 +204,7 @@ describe('<App />', () => {
     // Mock authenticated state
     mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
-      token: 'mock-token',
+      token: 'mock-token' as string | null,
       login: vi.fn(),
       logout: vi.fn()
     })
@@ -220,7 +220,7 @@ describe('<App />', () => {
     // Mock authenticated state
     mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
-      token: 'mock-token',
+      token: 'mock-token' as string | null,
       login: vi.fn(),
       logout: vi.fn()
     })
@@ -236,7 +236,7 @@ describe('<App />', () => {
     // Mock authenticated state
     mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
-      token: 'mock-token',
+      token: 'mock-token' as string | null,
       login: vi.fn(),
       logout: vi.fn()
     })
@@ -260,7 +260,7 @@ describe('<App />', () => {
     // Mock authenticated state
     mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
-      token: 'mock-token',
+      token: 'mock-token' as string | null,
       login: vi.fn(),
       logout: vi.fn()
     })
@@ -290,7 +290,7 @@ describe('<App />', () => {
     // Mock authenticated state
     mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
-      token: 'mock-token',
+      token: 'mock-token' as string | null,
       login: vi.fn(),
       logout: vi.fn()
     })
@@ -336,7 +336,7 @@ describe('<App />', () => {
     // Mock authenticated state
     mockUseAuth.mockReturnValueOnce({
       isAuthenticated: true,
-      token: 'mock-token',
+      token: 'mock-token' as string | null,
       login: vi.fn(),
       logout: vi.fn()
     })
@@ -374,5 +374,69 @@ describe('<App />', () => {
     // Check that it's displaying the expected output
     expect(screen.getByTestId('mock-stdout')).toHaveTextContent('Test output')
     expect(screen.getByTestId('mock-stderr')).toHaveTextContent('Test error')
+  })
+
+  it('should clear all user-specific state when user logs out', async () => {
+    // This test verifies that component remounting clears all user state
+    // to prevent the next user from seeing the previous user's data
+
+    let isAuthenticated = true
+    let currentToken: string | null = 'user1-token'
+    const mockAuthHook = vi.fn(() => ({
+      isAuthenticated,
+      token: isAuthenticated ? currentToken : null,
+      login: vi.fn(),
+      logout: vi.fn(() => {
+        isAuthenticated = false
+        currentToken = null
+      })
+    }))
+
+    // Mock the useAuth hook to return our dynamic mock
+    vi.mocked(mockUseAuth).mockImplementation(mockAuthHook)
+
+    // Arrange
+    const user = userEvent.setup()
+    const { rerender, unmount } = render(<App />)
+
+    // Act 1: Select a conversation and modify code while authenticated
+    await user.click(screen.getByTestId('select-conversation-button'))
+
+    const codeInput = screen.getByTestId('mock-code-input')
+    await user.clear(codeInput)
+    await user.type(codeInput, 'print("User 1 code")')
+
+    // Assert 1: User state should be set
+    expect(screen.getByTestId('selected-id')).toHaveTextContent('1')
+    expect(screen.getByTestId('mock-conversation-view')).toHaveTextContent(
+      'Viewing conversation 1'
+    )
+    expect(codeInput).toHaveValue('print("User 1 code")')
+
+    // Act 2: Simulate logout by changing authentication state
+    isAuthenticated = false
+    currentToken = null
+    rerender(<App />)
+
+    // Assert 2: Should show login screen (since user is no longer authenticated)
+    expect(screen.getByTestId('mock-login')).toBeInTheDocument()
+    expect(
+      screen.queryByTestId('mock-conversation-selector')
+    ).not.toBeInTheDocument()
+
+    // Act 3: Simulate login again as a different user with different token
+    isAuthenticated = true
+    currentToken = 'user2-token'
+    unmount()
+    render(<App />)
+
+    // Assert 3: All user state should be cleared due to component remounting with new key
+    expect(screen.getByTestId('selected-id')).toHaveTextContent('')
+    expect(screen.getByTestId('mock-conversation-view')).toHaveTextContent(
+      'No conversation selected'
+    )
+    expect(screen.getByTestId('mock-code-input')).toHaveValue(
+      "# Write your Python code here\nprint('Hello, Playdo!')"
+    )
   })
 })
