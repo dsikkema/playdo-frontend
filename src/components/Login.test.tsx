@@ -131,8 +131,10 @@ describe('Login', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
     // Check if button shows loading state
-    expect(screen.getByRole('button')).toHaveTextContent('Signing in...')
-    expect(screen.getByRole('button')).toBeDisabled()
+    await waitFor(() => {
+      expect(screen.getByText('Signing in...')).toBeInTheDocument()
+      expect(screen.getByRole('button')).toBeDisabled()
+    })
 
     // Wait for the login to complete
     await waitFor(() => {

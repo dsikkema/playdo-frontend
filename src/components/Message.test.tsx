@@ -48,7 +48,7 @@ describe('<Message />', () => {
     render(<Message message={assistantMessage} />)
 
     // Assert
-    expect(screen.getByText('Playdo')).toBeInTheDocument()
+    expect(screen.getByText('Playdo Assistant')).toBeInTheDocument()
     await waitFor(() => {
       expect(screen.getByText('I am the assistant')).toBeInTheDocument()
     })
