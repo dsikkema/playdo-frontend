@@ -377,7 +377,7 @@ describe('<App />', () => {
   })
 
   it('should clear all user-specific state when user logs out', async () => {
-    // This test verifies that component remounting clears all user state
+    // This test verifies that useEffect clears all user state on logout
     // to prevent the next user from seeing the previous user's data
 
     let isAuthenticated = true
@@ -397,7 +397,7 @@ describe('<App />', () => {
 
     // Arrange
     const user = userEvent.setup()
-    const { rerender, unmount } = render(<App />)
+    const { rerender } = render(<App />)
 
     // Act 1: Select a conversation and modify code while authenticated
     await user.click(screen.getByTestId('select-conversation-button'))
@@ -427,10 +427,9 @@ describe('<App />', () => {
     // Act 3: Simulate login again as a different user with different token
     isAuthenticated = true
     currentToken = 'user2-token'
-    unmount()
-    render(<App />)
+    rerender(<App />)
 
-    // Assert 3: All user state should be cleared due to component remounting with new key
+    // Assert 3: All user state should be cleared due to useEffect
     expect(screen.getByTestId('selected-id')).toHaveTextContent('')
     expect(screen.getByTestId('mock-conversation-view')).toHaveTextContent(
       'No conversation selected'

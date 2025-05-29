@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext'
 import usePythonExecution from '../hooks/usePythonExecution'
 
 function App() {
-  const { isAuthenticated, logout, token } = useAuth()
+  const { isAuthenticated, logout } = useAuth()
   const [selectedConversationId, setSelectedConversationId] = useState<
     number | null
   >(null)
@@ -36,6 +36,15 @@ function App() {
     }
   }, [initialize, isAuthenticated])
 
+  // Clear all user-specific state when user logs out
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSelectedConversationId(null)
+      setCode("# Write your Python code here\nprint('Hello, Playdo!')")
+      setOutputIsStale(true)
+    }
+  }, [isAuthenticated])
+
   // Mark output as stale when code changes
   useEffect(() => {
     setOutputIsStale(true)
@@ -57,7 +66,7 @@ function App() {
 
   // Otherwise, show the main application
   return (
-    <div key={token} className="flex h-screen flex-col bg-gray-50">
+    <div className="flex h-screen flex-col bg-gray-50">
       {/* Fixed header */}
       <header className="z-10 bg-white shadow">
         <div className="container mx-auto px-4 py-3">
