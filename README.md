@@ -1,5 +1,7 @@
 # Playdo Frontend
 
+<img src="./playdo-screenshot.png" />
+
 ## Technical Notes
 
 For technical design notes, see [TECHNICAL_NOTES.md](TECHNICAL_NOTES.md).
