@@ -78,6 +78,7 @@ src
    - App sets the `outputIsStale` flag to false, indicating that the output matches the current code
 
 2. **Conversation Flow**:
+
    - User types messages in the ConversationManager component
    - ConversationManager automatically attaches current code and output (when appropriate) to messages
    - Messages are sent to the backend Flask API
@@ -107,6 +108,7 @@ src
   - Initializes authentication state from localStorage on app load
 
 - **Login.tsx**: Component for user authentication
+
   - Provides a form for username and password input
   - Handles login API requests and response parsing
   - Manages form state and validation
@@ -175,6 +177,7 @@ src
   - Flag indicating if output is stale (code changed since last run)
 
 - **Message.tsx**: Uses props for:
+
   - Message data to render content
   - Processes markdown content with marked library
   - Sanitizes HTML with DOMPurify to prevent XSS attacks
@@ -213,6 +216,50 @@ The frontend communicates with the Flask backend API for:
   - Automatic inclusion of relevant code with each user message
   - Intelligent tracking to minimize data sent to the backend
 
+## UI/UX Enhancements
+
+### Visual Design System
+
+- **Typography**: Georgia serif font for message content - chosen for its beauty and readability
+- **Custom Color Palette**: Extended Tailwind configuration with cohesive primary (green-based) and secondary (purple-based) color schemes
+- **Unified Light Theme**: Consistent light theme across all components, including the code editor
+- **Custom Animations**: Smooth transitions and micro-interactions including:
+  - `fade-in`, `fade-in-up`, `fade-in-down` for content appearance
+  - `slide-in-right`, `slide-in-left` for panel transitions
+  - `scale-in` for emphasis elements
+  - `pulse-soft`, `bounce-soft` for loading states
+  - `spin-slow` for loading spinners
+- **Custom Shadows**: `shadow-soft` for subtle depth, `shadow-glow-green` and `shadow-glow-purple` for focus states
+
+### Enhanced Components
+
+- **Message Component**:
+  - User and assistant avatars with gradient backgrounds
+  - Visual indicators for messages containing code
+  - Improved typography with prose styling
+  - Hover effects and smooth transitions
+
+- **Conversation UI**:
+  - Beautiful empty states with illustrative icons
+  - Loading animations with context-aware messages
+  - Enhanced input area with better visual hierarchy
+
+- **Output Display**:
+  - Animated loading states with bouncing dots
+  - Clear visual feedback for code execution
+  - Helpful empty state with keyboard shortcut hint
+
+### Keyboard Shortcuts
+
+- **Ctrl+Enter / Cmd+Enter**: Execute Python code from anywhere in the application (implemented via CodeMirror keymap extension to prevent conflicts)
+
+### Accessibility & User Experience
+
+- Clear visual feedback for all interactive elements
+- Smooth transitions that respect motion preferences
+- Consistent hover and focus states
+- Improved error states with helpful icons and animations
+
 ## Key Design Principles
 
 1. **Gentle Minimalism**: UI is deliberately sleek and uncluttered, focusing on essential components while being beautiful
@@ -221,6 +268,7 @@ The frontend communicates with the Flask backend API for:
 4. **State Management**: React hooks pattern for local state management
 5. **Type Safety**: Comprehensive TypeScript typing throughout the application
 6. **Secure By Design**: Authentication integrated throughout the application with proper token management
+7. **Delightful Interactions**: Thoughtful animations and transitions that enhance usability without being distracting
 
 ## Technical Dependencies
 

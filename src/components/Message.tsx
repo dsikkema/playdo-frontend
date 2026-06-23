@@ -36,23 +36,90 @@ function Message({ message }: MessageProps) {
     processContent()
   }, [messageText])
 
-  // Check if the message contains code
+  // Check if the message contains code updates
+  const hasCodeUpdate = message.editor_code !== null
+
   return (
-    <div className="flex w-full">
+    <div
+      className={classNames(
+        'flex w-full items-start gap-3 animate-fade-in-up',
+        isUser ? 'flex-row-reverse' : 'flex-row'
+      )}
+    >
+      {/* Avatar */}
       <div
         className={classNames(
-          'max-w-[90%] rounded-lg p-4 mb-4',
-          // Use flex positioning instead of margin for alignment
+          'flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm',
           isUser
-            ? 'ml-auto mr-0 bg-blue-100 text-blue-800'
-            : 'ml-0 mr-auto bg-gray-100 text-gray-800'
+            ? 'bg-gradient-to-br from-secondary-400 to-secondary-500'
+            : 'bg-gradient-to-br from-primary-400 to-primary-500'
         )}
       >
-        <div className="mb-1 text-sm font-medium">
-          {isUser ? 'You' : 'Playdo'}
+        {isUser ? (
+          <svg
+            className="size-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+        ) : (
+          <svg
+            className="size-5 text-white"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg>
+        )}
+      </div>
+
+      {/* Message content */}
+      <div
+        className={classNames(
+          'group relative max-w-[70%] rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md',
+          isUser
+            ? 'bg-gradient-to-br from-secondary-50 to-secondary-100/50 text-secondary-900'
+            : 'bg-white text-gray-800 border border-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600'
+        )}
+      >
+        <div className="mb-1 flex items-center gap-2">
+          <span className="text-sm font-medium">
+            {isUser ? 'You' : 'Playdo Assistant'}
+          </span>
+          {hasCodeUpdate && (
+            <span className="flex items-center gap-1 rounded-full bg-primary-100 px-2 py-0.5 text-xs text-primary-700">
+              <svg
+                className="size-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                />
+              </svg>
+              Code attached
+            </span>
+          )}
         </div>
         <div
-          className="prose prose-slate max-w-none"
+          className={classNames(
+            'prose prose-sm max-w-none',
+            isUser ? 'prose-secondary' : 'prose-gray dark:prose-invert'
+          )}
           style={{ fontFamily: 'Georgia, serif' }}
         >
           <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
